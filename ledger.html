@@ -1,0 +1,1057 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover, user-scalable=no" />
+<meta name="theme-color" content="#f6f1e8" />
+<meta name="mobile-web-app-capable" content="yes" />
+<meta name="apple-mobile-web-app-capable" content="yes" />
+<meta name="apple-mobile-web-app-status-bar-style" content="default" />
+<meta name="apple-mobile-web-app-title" content="Ledger" />
+<title>Ledger</title>
+
+<!-- Inline PWA manifest so it can be installed without extra files -->
+<link rel="manifest" href='data:application/manifest+json,{"name":"Ledger","short_name":"Ledger","start_url":".","display":"standalone","background_color":"%23f6f1e8","theme_color":"%23f6f1e8","orientation":"portrait","icons":[{"src":"data:image/svg+xml;utf8,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 192 192%22><rect width=%22192%22 height=%22192%22 fill=%22%23f6f1e8%22/><text x=%2296%22 y=%22140%22 font-size=%22150%22 font-family=%22Georgia,serif%22 font-style=%22italic%22 text-anchor=%22middle%22 fill=%22%239a3412%22>§</text></svg>","sizes":"192x192","type":"image/svg+xml","purpose":"any maskable"},{"src":"data:image/svg+xml;utf8,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 512 512%22><rect width=%22512%22 height=%22512%22 fill=%22%23f6f1e8%22/><text x=%22256%22 y=%22380%22 font-size=%22400%22 font-family=%22Georgia,serif%22 font-style=%22italic%22 text-anchor=%22middle%22 fill=%22%239a3412%22>§</text></svg>","sizes":"512x512","type":"image/svg+xml","purpose":"any maskable"}]}' />
+
+<link rel="icon" href='data:image/svg+xml;utf8,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><rect width=%22100%22 height=%22100%22 fill=%22%23f6f1e8%22/><text x=%2250%22 y=%2275%22 font-size=%2280%22 font-family=%22Georgia,serif%22 font-style=%22italic%22 text-anchor=%22middle%22 fill=%22%239a3412%22>§</text></svg>' />
+
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:ital,opsz,wght@0,9..144,300..700;1,9..144,300..700&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+
+<style>
+  :root {
+    --bg: #f6f1e8;
+    --bg-card: #fbf7ef;
+    --ink: #1a1612;
+    --ink-soft: #5d544a;
+    --ink-muted: #8a7f72;
+    --line: #e6dccc;
+    --line-soft: #efe6d6;
+    --accent: #9a3412;
+    --serif: 'Fraunces', Georgia, serif;
+    --mono: 'JetBrains Mono', ui-monospace, monospace;
+  }
+
+  * { box-sizing: border-box; -webkit-tap-highlight-color: transparent; margin: 0; padding: 0; }
+  html, body { background: var(--bg); color: var(--ink); font-family: var(--serif); overscroll-behavior-y: contain; }
+  body {
+    min-height: 100vh;
+    min-height: 100dvh;
+    padding-bottom: calc(90px + env(safe-area-inset-bottom));
+    padding-top: env(safe-area-inset-top);
+  }
+  input, textarea, button { font-family: inherit; color: inherit; }
+  textarea { resize: none; }
+  input:focus, textarea:focus { outline: none; }
+  button { background: none; border: none; cursor: pointer; }
+  button:not(:disabled):active { transform: scale(0.98); }
+  ::placeholder { color: #b8ac9c; }
+
+  @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
+  @keyframes slideUp { from { transform: translateY(20px); opacity: 0; } to { transform: translateY(0); opacity: 1; } }
+
+  /* Header */
+  .header {
+    position: sticky; top: 0; z-index: 10;
+    background: var(--bg);
+    border-bottom: 1px solid var(--line);
+    padding-top: env(safe-area-inset-top);
+  }
+  .header-inner {
+    padding: 14px 20px 12px;
+    display: flex; justify-content: space-between; align-items: center;
+  }
+  .brand { display: flex; align-items: baseline; gap: 8px; }
+  .brand-mark { font-size: 22px; color: var(--accent); font-style: italic; }
+  .brand-text { font-size: 15px; font-weight: 500; letter-spacing: 0.12em; text-transform: uppercase; }
+  .header-right { display: flex; align-items: center; gap: 14px; }
+  .date-text { font-size: 11px; color: var(--ink-muted); font-family: var(--mono); letter-spacing: 0.04em; }
+  .header-btn {
+    color: var(--ink-soft); padding: 4px; display: flex; align-items: center;
+  }
+
+  /* Main */
+  main { padding: 24px 20px; animation: fadeIn 0.25s ease; }
+
+  /* Section head */
+  .section-head { margin-bottom: 28px; }
+  .eyebrow {
+    font-size: 10px; text-transform: uppercase; letter-spacing: 0.18em;
+    color: var(--accent); font-weight: 600; margin-bottom: 10px;
+    font-family: var(--mono);
+  }
+  h1 {
+    font-size: 32px; font-weight: 500; line-height: 1.05;
+    margin-bottom: 12px; letter-spacing: -0.02em; font-style: italic;
+  }
+  .sub { font-size: 14px; line-height: 1.55; color: var(--ink-soft); max-width: 34ch; }
+
+  /* Capture */
+  .capture-box {
+    background: var(--bg-card); border: 1px solid var(--line);
+    border-radius: 4px; padding: 16px;
+  }
+  .capture-textarea {
+    width: 100%; border: none; background: transparent;
+    font-size: 16px; line-height: 1.5; margin-bottom: 12px;
+  }
+  .btn-primary {
+    display: inline-flex; align-items: center; gap: 6px;
+    background: var(--ink); color: var(--bg);
+    padding: 10px 16px; border-radius: 2px;
+    font-size: 13px; font-weight: 500; letter-spacing: 0.04em;
+    text-transform: uppercase; font-family: var(--mono);
+  }
+  .btn-primary:disabled { opacity: 0.4; }
+  .btn-primary-full {
+    display: flex; align-items: center; justify-content: center; gap: 8px;
+    background: var(--ink); color: var(--bg); width: 100%;
+    padding: 14px; border-radius: 2px;
+    font-size: 13px; font-weight: 500; letter-spacing: 0.06em;
+    text-transform: uppercase; font-family: var(--mono);
+  }
+  .btn-primary-full:disabled { opacity: 0.4; }
+
+  .divider {
+    display: flex; align-items: center; margin: 28px 0 16px;
+  }
+  .divider-text {
+    font-size: 10px; text-transform: uppercase; letter-spacing: 0.16em;
+    color: var(--ink-muted); font-family: var(--mono);
+  }
+
+  .list { display: flex; flex-direction: column; gap: 10px; }
+  .empty {
+    padding: 32px 16px; text-align: center;
+    color: var(--ink-muted); font-size: 14px; font-style: italic;
+  }
+
+  .capture-card {
+    background: var(--bg-card); border: 1px solid var(--line);
+    border-radius: 4px; padding: 14px 16px;
+  }
+  .capture-text { font-size: 15px; line-height: 1.5; margin-bottom: 10px; }
+  .capture-meta { display: flex; justify-content: space-between; align-items: center; }
+  .capture-time { font-size: 11px; color: var(--ink-muted); font-family: var(--mono); }
+  .capture-actions { display: flex; gap: 4px; }
+  .icon-btn {
+    color: var(--ink-soft); padding: 6px; display: flex;
+    align-items: center; justify-content: center; border-radius: 2px;
+  }
+
+  /* Modal */
+  .modal-overlay {
+    position: fixed; inset: 0; background: rgba(26,22,18,0.55);
+    z-index: 100; display: flex; align-items: flex-end;
+    animation: fadeIn 0.2s ease;
+  }
+  .modal {
+    background: var(--bg); width: 100%; max-height: 92vh;
+    overflow-y: auto; border-radius: 12px 12px 0 0;
+    padding: 20px 20px calc(20px + env(safe-area-inset-bottom));
+    animation: slideUp 0.3s cubic-bezier(.2,.8,.2,1);
+  }
+  .modal-head {
+    display: flex; justify-content: space-between; align-items: center;
+    margin-bottom: 16px;
+  }
+  .modal-eyebrow {
+    font-size: 10px; text-transform: uppercase; letter-spacing: 0.18em;
+    color: var(--accent); font-weight: 600; font-family: var(--mono);
+  }
+  .modal-problem {
+    font-size: 17px; font-style: italic; line-height: 1.4;
+    margin-bottom: 24px; padding-bottom: 20px;
+    border-bottom: 1px solid var(--line);
+  }
+  .label {
+    display: block; font-size: 11px; text-transform: uppercase;
+    letter-spacing: 0.12em; color: var(--ink-soft); margin-bottom: 8px;
+    font-family: var(--mono); font-weight: 500;
+  }
+  .why-textarea {
+    width: 100%; background: var(--bg-card);
+    border: 1px solid var(--line); border-radius: 4px;
+    padding: 10px 12px; font-size: 14px; line-height: 1.5;
+  }
+
+  .scale-row { margin-top: 20px; }
+  .scale-head { display: flex; justify-content: space-between; align-items: baseline; }
+  .scale-label {
+    font-size: 11px; text-transform: uppercase; letter-spacing: 0.12em;
+    color: var(--ink-soft); font-weight: 500; font-family: var(--mono);
+  }
+  .scale-val { font-size: 22px; font-weight: 500; font-style: italic; }
+  .scale-sub { font-size: 12px; color: var(--ink-muted); margin-top: 2px; margin-bottom: 10px; }
+  .scale-btns { display: flex; gap: 8px; }
+  .scale-pip {
+    flex: 1; height: 32px; border: 1px solid var(--line);
+    border-radius: 2px; transition: all 0.15s;
+  }
+  .scale-pip.active { background: var(--ink); border-color: var(--ink); }
+  .scale-bounds {
+    display: flex; justify-content: space-between; margin-top: 6px;
+    font-size: 10px; color: var(--ink-muted); text-transform: uppercase;
+    letter-spacing: 0.08em; font-family: var(--mono);
+  }
+
+  .check-row { display: flex; gap: 8px; margin-top: 20px; }
+  .check-opt {
+    flex: 1; display: flex; align-items: center; justify-content: center;
+    gap: 6px; padding: 12px 8px; border: 1px solid var(--line);
+    border-radius: 2px; font-size: 12px; transition: all 0.15s;
+    font-family: var(--serif);
+  }
+  .check-opt.active { background: var(--ink); color: var(--bg); border-color: var(--ink); }
+
+  .score-box {
+    margin: 24px 0; padding: 16px 20px;
+    background: var(--bg-card); border: 1px solid var(--line);
+    border-radius: 4px; display: flex;
+    justify-content: space-between; align-items: center;
+  }
+  .score-label {
+    font-size: 11px; text-transform: uppercase; letter-spacing: 0.14em;
+    color: var(--ink-soft); font-family: var(--mono);
+  }
+  .score-val { font-size: 36px; font-weight: 500; font-style: italic; color: var(--accent); line-height: 1; }
+
+  /* Queue */
+  .queue-card {
+    display: flex; gap: 14px; align-items: flex-start;
+    background: var(--bg-card); border: 1px solid var(--line);
+    border-radius: 4px; padding: 16px;
+  }
+  .queue-rank { display: flex; flex-direction: column; align-items: center; gap: 6px; min-width: 34px; }
+  .rank-num { font-size: 11px; color: var(--ink-muted); font-family: var(--mono); }
+  .score-badge {
+    background: var(--ink); color: var(--bg);
+    width: 34px; height: 34px; border-radius: 50%;
+    display: flex; align-items: center; justify-content: center;
+    font-size: 13px; font-weight: 600; font-style: italic;
+  }
+  .queue-body { flex: 1; min-width: 0; }
+  .queue-problem { font-size: 15px; line-height: 1.45; margin-bottom: 6px; }
+  .queue-why { font-size: 13px; color: var(--ink-soft); font-style: italic; line-height: 1.45; margin-bottom: 10px; }
+  .queue-tags { display: flex; flex-wrap: wrap; gap: 6px; }
+  .tag {
+    font-size: 10px; padding: 3px 8px; background: var(--line-soft);
+    color: var(--ink-soft); border-radius: 2px; text-transform: uppercase;
+    letter-spacing: 0.06em; font-family: var(--mono);
+  }
+
+  /* Today */
+  .today-count {
+    display: flex; align-items: baseline; justify-content: center;
+    margin: 8px 0 24px; gap: 4px;
+  }
+  .today-count-num { font-size: 64px; font-weight: 500; font-style: italic; color: var(--accent); line-height: 1; }
+  .today-count-slash { font-size: 32px; color: var(--ink-muted); font-weight: 300; }
+  .today-count-total { font-size: 32px; color: var(--ink-muted); font-style: italic; }
+
+  .today-list { display: flex; flex-direction: column; gap: 12px; }
+  .today-item {
+    display: flex; align-items: center; gap: 14px;
+    background: var(--bg-card); border: 1px solid var(--line);
+    border-radius: 4px; padding: 16px;
+  }
+  .today-marker { font-size: 13px; color: var(--accent); font-style: italic; font-weight: 500; min-width: 22px; }
+  .today-input {
+    flex: 1; border: none; background: transparent;
+    font-size: 15px; line-height: 1.5;
+  }
+
+  .pull-btn {
+    display: flex; align-items: center; gap: 12px; width: 100%;
+    border: 1px solid var(--line); border-radius: 4px;
+    padding: 12px 14px; text-align: left;
+  }
+  .pull-score {
+    background: var(--ink); color: var(--bg);
+    width: 26px; height: 26px; border-radius: 50%;
+    display: flex; align-items: center; justify-content: center;
+    font-size: 11px; font-weight: 600; flex-shrink: 0;
+  }
+  .pull-text { flex: 1; font-size: 14px; }
+
+  /* Dump */
+  .dump-area {
+    width: 100%; background: var(--bg-card);
+    border: 1px solid var(--line); border-radius: 4px;
+    padding: 16px; font-size: 15px; line-height: 1.6;
+    min-height: 320px;
+  }
+  .dump-count {
+    margin-top: 8px; font-size: 11px; color: var(--ink-muted);
+    font-family: var(--mono); text-align: right; letter-spacing: 0.04em;
+  }
+
+  /* Shutdown */
+  .sd-field { margin-bottom: 20px; }
+  .sd-head { display: flex; align-items: flex-start; gap: 12px; margin-bottom: 8px; }
+  .sd-num { font-size: 11px; color: var(--accent); font-weight: 600; font-family: var(--mono); margin-top: 3px; }
+  .sd-label { font-size: 15px; font-style: italic; font-weight: 500; }
+  .sd-sub { font-size: 12px; color: var(--ink-muted); margin-top: 2px; }
+  .sd-textarea {
+    width: 100%; background: var(--bg-card);
+    border: 1px solid var(--line); border-radius: 4px;
+    padding: 12px 14px; font-size: 14px; line-height: 1.5;
+  }
+
+  .history-card {
+    background: var(--bg-card); border: 1px solid var(--line);
+    border-radius: 4px; padding: 14px 16px;
+  }
+  .history-date {
+    font-size: 11px; color: var(--ink-muted); margin-bottom: 10px;
+    font-family: var(--mono); text-transform: uppercase; letter-spacing: 0.08em;
+  }
+  .history-row { font-size: 13px; line-height: 1.5; margin-top: 6px; color: var(--ink-soft); }
+  .history-label {
+    display: inline-block; font-size: 9px; text-transform: uppercase;
+    letter-spacing: 0.12em; color: var(--accent); font-weight: 600;
+    margin-right: 8px; font-family: var(--mono);
+  }
+
+  /* Settings */
+  .settings-section { margin-bottom: 28px; }
+  .settings-section-title {
+    font-size: 11px; text-transform: uppercase; letter-spacing: 0.14em;
+    color: var(--ink-soft); font-family: var(--mono);
+    margin-bottom: 12px; font-weight: 500;
+  }
+  .setting-btn {
+    width: 100%; display: flex; align-items: center; gap: 14px;
+    padding: 16px; background: var(--bg-card);
+    border: 1px solid var(--line); border-radius: 4px;
+    text-align: left; margin-bottom: 8px;
+  }
+  .setting-icon { color: var(--accent); flex-shrink: 0; }
+  .setting-content { flex: 1; }
+  .setting-title { font-size: 15px; margin-bottom: 2px; }
+  .setting-desc { font-size: 12px; color: var(--ink-muted); line-height: 1.4; }
+  .setting-danger { color: #b91c1c; }
+  .setting-danger .setting-icon { color: #b91c1c; }
+  .stats-row {
+    display: grid; grid-template-columns: repeat(2, 1fr); gap: 8px;
+    margin-bottom: 16px;
+  }
+  .stat-box {
+    background: var(--bg-card); border: 1px solid var(--line);
+    border-radius: 4px; padding: 14px;
+  }
+  .stat-num { font-size: 28px; font-weight: 500; font-style: italic; color: var(--accent); line-height: 1; }
+  .stat-label {
+    font-size: 10px; text-transform: uppercase; letter-spacing: 0.12em;
+    color: var(--ink-muted); font-family: var(--mono); margin-top: 6px;
+  }
+
+  /* Toast */
+  .toast {
+    position: fixed; bottom: calc(110px + env(safe-area-inset-bottom));
+    left: 50%; transform: translateX(-50%);
+    background: var(--ink); color: var(--bg);
+    padding: 12px 20px; border-radius: 4px;
+    font-size: 13px; font-family: var(--mono);
+    letter-spacing: 0.04em; z-index: 200;
+    animation: slideUp 0.25s ease;
+  }
+
+  /* Tabbar */
+  .tabbar {
+    position: fixed; bottom: 0; left: 0; right: 0;
+    background: rgba(246, 241, 232, 0.92);
+    backdrop-filter: blur(12px); -webkit-backdrop-filter: blur(12px);
+    border-top: 1px solid var(--line);
+    display: flex; justify-content: space-around;
+    padding: 10px 8px calc(18px + env(safe-area-inset-bottom));
+    z-index: 50;
+  }
+  .tab-btn {
+    flex: 1; display: flex; flex-direction: column; align-items: center;
+    gap: 4px; padding: 6px 4px; position: relative;
+    color: var(--ink-muted);
+  }
+  .tab-btn.active { color: var(--ink); }
+  .tab-btn svg { stroke-width: 1.5; }
+  .tab-btn.active svg { stroke-width: 2.2; }
+  .tab-label {
+    font-size: 10px; letter-spacing: 0.08em; text-transform: uppercase;
+    font-family: var(--mono); font-weight: 400;
+  }
+  .tab-btn.active .tab-label { font-weight: 600; }
+  .active-dot {
+    position: absolute; bottom: -2px;
+    width: 4px; height: 4px; border-radius: 50%;
+    background: var(--accent);
+  }
+
+  /* Install prompt */
+  .install-banner {
+    position: fixed; bottom: calc(110px + env(safe-area-inset-bottom));
+    left: 16px; right: 16px;
+    background: var(--ink); color: var(--bg);
+    padding: 14px 16px; border-radius: 6px;
+    display: flex; align-items: center; gap: 12px;
+    z-index: 60; animation: slideUp 0.3s ease;
+  }
+  .install-banner-text { flex: 1; font-size: 13px; line-height: 1.4; }
+  .install-banner-btn {
+    color: var(--bg); font-family: var(--mono);
+    font-size: 12px; padding: 8px 12px; border: 1px solid var(--bg);
+    border-radius: 2px; text-transform: uppercase; letter-spacing: 0.06em;
+  }
+  .install-banner-close { color: var(--bg); padding: 4px; }
+</style>
+</head>
+<body>
+
+<header class="header">
+  <div class="header-inner">
+    <div class="brand">
+      <span class="brand-mark">§</span>
+      <span class="brand-text">Ledger</span>
+    </div>
+    <div class="header-right">
+      <div class="date-text" id="dateText"></div>
+    </div>
+  </div>
+</header>
+
+<main id="main"></main>
+
+<nav class="tabbar" id="tabbar"></nav>
+
+<div id="modal-root"></div>
+<div id="toast-root"></div>
+<div id="install-root"></div>
+
+<script>
+// ============ STATE ============
+const STORAGE_KEY = 'ledger_v1';
+const defaultState = {
+  captures: [],
+  queue: [],
+  today: { date: '', items: ['', '', ''] },
+  brainDump: '',
+  shutdown: { date: '', completed: '', moved: '', waiting: '' },
+  history: [],
+};
+
+let state = loadState();
+let currentTab = 'capture';
+let promoting = null;
+let deferredInstallPrompt = null;
+
+function loadState() {
+  try {
+    const raw = localStorage.getItem(STORAGE_KEY);
+    if (!raw) return { ...defaultState };
+    const parsed = JSON.parse(raw);
+    return { ...defaultState, ...parsed };
+  } catch {
+    return { ...defaultState };
+  }
+}
+function saveState() {
+  try { localStorage.setItem(STORAGE_KEY, JSON.stringify(state)); }
+  catch (e) { console.error('Save failed', e); }
+}
+
+function todayKey() { return new Date().toISOString().slice(0, 10); }
+
+// Reset today/shutdown if it's a new day
+function rolloverIfNeeded() {
+  const tk = todayKey();
+  if (state.today.date !== tk) state.today = { date: tk, items: ['', '', ''] };
+  if (state.shutdown.date !== tk) state.shutdown = { date: tk, completed: '', moved: '', waiting: '' };
+  saveState();
+}
+rolloverIfNeeded();
+
+function formatDate(d) {
+  return d.toLocaleDateString('en-US', { weekday: 'long', month: 'long', day: 'numeric' });
+}
+function timeAgo(ts) {
+  const s = Math.floor((Date.now() - ts) / 1000);
+  if (s < 60) return 'just now';
+  if (s < 3600) return Math.floor(s / 60) + 'm';
+  if (s < 86400) return Math.floor(s / 3600) + 'h';
+  return Math.floor(s / 86400) + 'd';
+}
+function escapeHtml(s) {
+  return String(s).replace(/[&<>"']/g, c => ({ '&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;' }[c]));
+}
+function nl2br(s) { return escapeHtml(s).replace(/\n/g, '<br>'); }
+
+// ============ ICONS ============
+const icons = {
+  inbox: '<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor"><polyline points="22 12 16 12 14 15 10 15 8 12 2 12"/><path d="M5.45 5.11 2 12v6a2 2 0 0 0 2 2h16a2 2 0 0 0 2-2v-6l-3.45-6.89A2 2 0 0 0 16.76 4H7.24a2 2 0 0 0-1.79 1.11z"/></svg>',
+  list: '<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor"><path d="m3 17 2 2 4-4"/><path d="m3 7 2 2 4-4"/><path d="M13 6h8"/><path d="M13 12h8"/><path d="M13 18h8"/></svg>',
+  sun: '<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor"><circle cx="12" cy="12" r="4"/><path d="M12 2v2"/><path d="M12 20v2"/><path d="m4.93 4.93 1.41 1.41"/><path d="m17.66 17.66 1.41 1.41"/><path d="M2 12h2"/><path d="M20 12h2"/><path d="m6.34 17.66-1.41 1.41"/><path d="m19.07 4.93-1.41 1.41"/></svg>',
+  archive: '<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor"><rect width="20" height="5" x="2" y="3" rx="1"/><path d="M4 8v11a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8"/><path d="M10 12h4"/></svg>',
+  moon: '<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor"><path d="M12 3a6 6 0 0 0 9 9 9 9 0 1 1-9-9Z"/></svg>',
+  settings: '<svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor"><path d="M12.22 2h-.44a2 2 0 0 0-2 2v.18a2 2 0 0 1-1 1.73l-.43.25a2 2 0 0 1-2 0l-.15-.08a2 2 0 0 0-2.73.73l-.22.38a2 2 0 0 0 .73 2.73l.15.1a2 2 0 0 1 1 1.72v.51a2 2 0 0 1-1 1.74l-.15.09a2 2 0 0 0-.73 2.73l.22.38a2 2 0 0 0 2.73.73l.15-.08a2 2 0 0 1 2 0l.43.25a2 2 0 0 1 1 1.73V20a2 2 0 0 0 2 2h.44a2 2 0 0 0 2-2v-.18a2 2 0 0 1 1-1.73l.43-.25a2 2 0 0 1 2 0l.15.08a2 2 0 0 0 2.73-.73l.22-.39a2 2 0 0 0-.73-2.73l-.15-.08a2 2 0 0 1-1-1.74v-.5a2 2 0 0 1 1-1.74l.15-.09a2 2 0 0 0 .73-2.73l-.22-.38a2 2 0 0 0-2.73-.73l-.15.08a2 2 0 0 1-2 0l-.43-.25a2 2 0 0 1-1-1.73V4a2 2 0 0 0-2-2z"/><circle cx="12" cy="12" r="3"/></svg>',
+  plus: '<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M5 12h14"/><path d="M12 5v14"/></svg>',
+  x: '<svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M18 6 6 18"/><path d="m6 6 12 12"/></svg>',
+  xBig: '<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M18 6 6 18"/><path d="m6 6 12 12"/></svg>',
+  check: '<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="20 6 9 17 4 12"/></svg>',
+  checkSmall: '<svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="20 6 9 17 4 12"/></svg>',
+  arrowUp: '<svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M7 7h10v10"/><path d="M7 17 17 7"/></svg>',
+  trash: '<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6"><path d="M3 6h18"/><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6"/><path d="M8 6V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"/></svg>',
+  chevronRight: '<svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6"><path d="m9 18 6-6-6-6"/></svg>',
+  download: '<svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" x2="12" y1="15" y2="3"/></svg>',
+  upload: '<svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="17 8 12 3 7 8"/><line x1="12" x2="12" y1="3" y2="15"/></svg>',
+  trashBig: '<svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6"><path d="M3 6h18"/><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6"/></svg>',
+};
+
+// ============ RENDER ============
+function render() {
+  rolloverIfNeeded();
+  document.getElementById('dateText').textContent = formatDate(new Date());
+  renderTabbar();
+  renderMain();
+}
+
+function renderTabbar() {
+  const tabs = [
+    { id: 'capture', label: 'Capture', icon: icons.inbox },
+    { id: 'queue', label: 'Queue', icon: icons.list },
+    { id: 'today', label: 'Today', icon: icons.sun },
+    { id: 'dump', label: 'Dump', icon: icons.archive },
+    { id: 'shutdown', label: 'Close', icon: icons.moon },
+    { id: 'settings', label: 'Data', icon: icons.settings },
+  ];
+  document.getElementById('tabbar').innerHTML = tabs.map(t => `
+    <button class="tab-btn ${currentTab === t.id ? 'active' : ''}" data-tab="${t.id}">
+      ${t.icon}
+      <span class="tab-label">${t.label}</span>
+      ${currentTab === t.id ? '<div class="active-dot"></div>' : ''}
+    </button>
+  `).join('');
+  document.querySelectorAll('[data-tab]').forEach(btn => {
+    btn.addEventListener('click', () => { currentTab = btn.dataset.tab; render(); });
+  });
+}
+
+function renderMain() {
+  const m = document.getElementById('main');
+  if (currentTab === 'capture') renderCapture(m);
+  else if (currentTab === 'queue') renderQueue(m);
+  else if (currentTab === 'today') renderToday(m);
+  else if (currentTab === 'dump') renderDump(m);
+  else if (currentTab === 'shutdown') renderShutdown(m);
+  else if (currentTab === 'settings') renderSettings(m);
+}
+
+// ============ CAPTURE ============
+function renderCapture(root) {
+  root.innerHTML = `
+    <div class="section-head">
+      <div class="eyebrow">Inbox</div>
+      <h1>Capture, don't solve.</h1>
+      <p class="sub">Drop the thought here. Filter it later. The brain's job is to notice — not to decide.</p>
+    </div>
+    <div class="capture-box">
+      <textarea class="capture-textarea" id="captureText" placeholder="What did you notice?" rows="3"></textarea>
+      <button class="btn-primary" id="captureBtn" disabled>${icons.plus}<span>Capture</span></button>
+    </div>
+    <div class="divider"><span class="divider-text">${state.captures.length === 0 ? 'Empty' : state.captures.length + ' unfiltered'}</span></div>
+    <div class="list" id="capturesList">
+      ${state.captures.length === 0 ? '<div class="empty">Nothing in the inbox.</div>' :
+        state.captures.map(c => `
+          <div class="capture-card">
+            <div class="capture-text">${nl2br(c.text)}</div>
+            <div class="capture-meta">
+              <span class="capture-time">${timeAgo(c.ts)}</span>
+              <div class="capture-actions">
+                <button class="icon-btn" data-promote="${c.id}" title="Score & queue">${icons.arrowUp}</button>
+                <button class="icon-btn" data-remove-capture="${c.id}" title="Discard">${icons.x}</button>
+              </div>
+            </div>
+          </div>
+        `).join('')
+      }
+    </div>
+  `;
+  const ta = document.getElementById('captureText');
+  const btn = document.getElementById('captureBtn');
+  ta.addEventListener('input', () => { btn.disabled = !ta.value.trim(); });
+  btn.addEventListener('click', () => {
+    if (!ta.value.trim()) return;
+    state.captures.unshift({ id: Date.now(), text: ta.value.trim(), ts: Date.now() });
+    saveState();
+    ta.value = '';
+    render();
+  });
+  document.querySelectorAll('[data-promote]').forEach(b => {
+    b.addEventListener('click', () => {
+      const id = Number(b.dataset.promote);
+      promoting = state.captures.find(c => c.id === id);
+      renderPromoteModal();
+    });
+  });
+  document.querySelectorAll('[data-remove-capture]').forEach(b => {
+    b.addEventListener('click', () => {
+      const id = Number(b.dataset.removeCapture);
+      state.captures = state.captures.filter(c => c.id !== id);
+      saveState();
+      render();
+    });
+  });
+}
+
+// ============ PROMOTE MODAL ============
+let promoteState = { why: '', frequency: 3, impact: 3, recurring: true, dataSolvable: false };
+
+function renderPromoteModal() {
+  promoteState = { why: '', frequency: 3, impact: 3, recurring: true, dataSolvable: false };
+  const score = computeScore();
+  document.getElementById('modal-root').innerHTML = `
+    <div class="modal-overlay" id="modalOverlay">
+      <div class="modal" id="modalBody">
+        <div class="modal-head">
+          <div class="modal-eyebrow">Promote to Queue</div>
+          <button class="icon-btn" id="closeModal">${icons.xBig}</button>
+        </div>
+        <div class="modal-problem">"${escapeHtml(promoting.text)}"</div>
+        <label class="label">Why does it matter?</label>
+        <textarea class="why-textarea" id="whyInput" rows="2" placeholder="Lost orders? Cash trapped? Recurring delay?"></textarea>
+        ${scaleRow('Frequency', 'How often does it surface?', 'frequency', 'Rare', 'Constant')}
+        ${scaleRow('Impact', 'If unsolved, what is the cost?', 'impact', 'Minor', 'Severe')}
+        <div class="check-row">
+          ${checkOpt('recurring', 'Recurring pattern')}
+          ${checkOpt('dataSolvable', 'Data can solve it')}
+        </div>
+        <div class="score-box">
+          <div class="score-label">Priority score</div>
+          <div class="score-val" id="scoreVal">${score}</div>
+        </div>
+        <button class="btn-primary-full" id="confirmPromote">${icons.check}<span>Move to Queue</span></button>
+      </div>
+    </div>
+  `;
+  document.getElementById('modalOverlay').addEventListener('click', closeModal);
+  document.getElementById('modalBody').addEventListener('click', e => e.stopPropagation());
+  document.getElementById('closeModal').addEventListener('click', closeModal);
+  document.getElementById('whyInput').addEventListener('input', e => { promoteState.why = e.target.value; });
+  document.querySelectorAll('[data-scale]').forEach(b => {
+    b.addEventListener('click', () => {
+      const [field, val] = b.dataset.scale.split(':');
+      promoteState[field] = Number(val);
+      renderPromoteModal();
+      document.getElementById('whyInput').value = promoteState.why;
+    });
+  });
+  document.querySelectorAll('[data-check]').forEach(b => {
+    b.addEventListener('click', () => {
+      const field = b.dataset.check;
+      promoteState[field] = !promoteState[field];
+      renderPromoteModal();
+      document.getElementById('whyInput').value = promoteState.why;
+    });
+  });
+  document.getElementById('confirmPromote').addEventListener('click', () => {
+    state.queue.unshift({
+      id: Date.now(),
+      problem: promoting.text,
+      why: promoteState.why.trim(),
+      frequency: promoteState.frequency,
+      impact: promoteState.impact,
+      recurring: promoteState.recurring,
+      dataSolvable: promoteState.dataSolvable,
+      score: computeScore(),
+      ts: Date.now(),
+    });
+    state.captures = state.captures.filter(c => c.id !== promoting.id);
+    saveState();
+    promoting = null;
+    closeModal();
+    showToast('Moved to Queue');
+    render();
+  });
+}
+function computeScore() {
+  return (promoteState.frequency * promoteState.impact) + (promoteState.recurring ? 5 : 0) + (promoteState.dataSolvable ? 3 : 0);
+}
+function scaleRow(label, sub, field, lo, hi) {
+  const val = promoteState[field];
+  return `
+    <div class="scale-row">
+      <div class="scale-head">
+        <span class="scale-label">${label}</span>
+        <span class="scale-val">${val}</span>
+      </div>
+      <div class="scale-sub">${sub}</div>
+      <div class="scale-btns">
+        ${[1,2,3,4,5].map(n => `<button class="scale-pip ${n <= val ? 'active' : ''}" data-scale="${field}:${n}"></button>`).join('')}
+      </div>
+      <div class="scale-bounds"><span>${lo}</span><span>${hi}</span></div>
+    </div>
+  `;
+}
+function checkOpt(field, label) {
+  const active = promoteState[field];
+  return `<button class="check-opt ${active ? 'active' : ''}" data-check="${field}">${active ? icons.checkSmall : ''}<span>${label}</span></button>`;
+}
+function closeModal() {
+  document.getElementById('modal-root').innerHTML = '';
+  promoting = null;
+}
+
+// ============ QUEUE ============
+function renderQueue(root) {
+  const sorted = [...state.queue].sort((a, b) => b.score - a.score);
+  root.innerHTML = `
+    <div class="section-head">
+      <div class="eyebrow">Strategic Queue</div>
+      <h1>Sorted by leverage.</h1>
+      <p class="sub">Only the top items deserve deep work. Everything else is noise dressed as urgency.</p>
+    </div>
+    <div class="divider"><span class="divider-text">${sorted.length === 0 ? 'Empty' : sorted.length + ' scored'}</span></div>
+    <div class="list">
+      ${sorted.length === 0 ? '<div class="empty">Promote captures from the Inbox to populate the queue.</div>' :
+        sorted.map((q, i) => `
+          <div class="queue-card">
+            <div class="queue-rank">
+              <span class="rank-num">${String(i + 1).padStart(2, '0')}</span>
+              <div class="score-badge">${q.score}</div>
+            </div>
+            <div class="queue-body">
+              <div class="queue-problem">${nl2br(q.problem)}</div>
+              ${q.why ? `<div class="queue-why">${nl2br(q.why)}</div>` : ''}
+              <div class="queue-tags">
+                <span class="tag">F${q.frequency}</span>
+                <span class="tag">I${q.impact}</span>
+                ${q.recurring ? '<span class="tag">recurring</span>' : ''}
+                ${q.dataSolvable ? '<span class="tag">data-solvable</span>' : ''}
+              </div>
+            </div>
+            <button class="icon-btn" data-remove-queue="${q.id}">${icons.trash}</button>
+          </div>
+        `).join('')
+      }
+    </div>
+  `;
+  document.querySelectorAll('[data-remove-queue]').forEach(b => {
+    b.addEventListener('click', () => {
+      const id = Number(b.dataset.removeQueue);
+      state.queue = state.queue.filter(q => q.id !== id);
+      saveState();
+      render();
+    });
+  });
+}
+
+// ============ TODAY ============
+function renderToday(root) {
+  const filled = state.today.items.filter(x => x.trim()).length;
+  const sortedQ = [...state.queue].sort((a, b) => b.score - a.score).slice(0, 5);
+  root.innerHTML = `
+    <div class="section-head">
+      <div class="eyebrow">Today</div>
+      <h1>Three. Not fifteen.</h1>
+      <p class="sub">Defined the night before. Closed loops only. If it doesn't fit in three, it isn't a priority.</p>
+    </div>
+    <div class="today-count">
+      <span class="today-count-num">${filled}</span>
+      <span class="today-count-slash">/</span>
+      <span class="today-count-total">3</span>
+    </div>
+    <div class="today-list">
+      ${state.today.items.map((item, i) => `
+        <div class="today-item">
+          <div class="today-marker">${['I','II','III'][i]}</div>
+          <input class="today-input" data-today-i="${i}" value="${escapeHtml(item)}" placeholder="Defined deliverable…" />
+        </div>
+      `).join('')}
+    </div>
+    ${sortedQ.length > 0 ? `
+      <div class="divider"><span class="divider-text">Pull from Queue</span></div>
+      <div class="list">
+        ${sortedQ.map(q => `
+          <button class="pull-btn" data-pull="${escapeHtml(q.problem)}">
+            <div class="pull-score">${q.score}</div>
+            <div class="pull-text">${nl2br(q.problem)}</div>
+            ${icons.chevronRight}
+          </button>
+        `).join('')}
+      </div>
+    ` : ''}
+  `;
+  document.querySelectorAll('[data-today-i]').forEach(inp => {
+    inp.addEventListener('input', e => {
+      const i = Number(inp.dataset.todayI);
+      state.today.items[i] = e.target.value;
+      saveState();
+    });
+  });
+  document.querySelectorAll('[data-pull]').forEach(b => {
+    b.addEventListener('click', () => {
+      const problem = b.dataset.pull;
+      const empty = state.today.items.findIndex(x => !x.trim());
+      if (empty === -1) { showToast('All three slots filled'); return; }
+      state.today.items[empty] = problem;
+      saveState();
+      render();
+    });
+  });
+}
+
+// ============ DUMP ============
+function renderDump(root) {
+  root.innerHTML = `
+    <div class="section-head">
+      <div class="eyebrow">Brain Dump</div>
+      <h1>Empty the head.</h1>
+      <p class="sub">Unresolved tasks, concerns, ideas, pending decisions. Convince the brain nothing will be forgotten.</p>
+    </div>
+    <textarea class="dump-area" id="dumpArea" rows="18" placeholder="— pending decisions
+— concerns weighing on the mind
+— ideas to revisit
+— things half-thought-through…">${escapeHtml(state.brainDump)}</textarea>
+    <div class="dump-count" id="dumpCount">${state.brainDump.length} characters · saves automatically</div>
+  `;
+  const area = document.getElementById('dumpArea');
+  const count = document.getElementById('dumpCount');
+  area.addEventListener('input', e => {
+    state.brainDump = e.target.value;
+    saveState();
+    count.textContent = state.brainDump.length + ' characters · saves automatically';
+  });
+}
+
+// ============ SHUTDOWN ============
+function renderShutdown(root) {
+  const sd = state.shutdown;
+  const ready = sd.completed.trim() || sd.moved.trim() || sd.waiting.trim();
+  root.innerHTML = `
+    <div class="section-head">
+      <div class="eyebrow">Shutdown Ritual</div>
+      <h1>Close the day.</h1>
+      <p class="sub">Recognize what moved. Tell the brain it's safe to stop processing.</p>
+    </div>
+    ${sdField('01', 'Completed', 'What actually got done.', 'completed', sd.completed)}
+    ${sdField('02', 'Moved forward', 'What advanced, even partially.', 'moved', sd.moved)}
+    ${sdField('03', 'Can wait', 'What you are consciously deferring.', 'waiting', sd.waiting)}
+    <button class="btn-primary-full" id="closeDayBtn" ${ready ? '' : 'disabled'} style="margin-top: 24px;">
+      ${icons.moon}<span>Close the Day</span>
+    </button>
+    ${state.history.length > 0 ? `
+      <div class="divider"><span class="divider-text">Past Closes</span></div>
+      <div class="list">
+        ${state.history.slice(0, 5).map(h => `
+          <div class="history-card">
+            <div class="history-date">${formatDate(new Date(h.ts))}</div>
+            ${h.completed ? `<div class="history-row"><span class="history-label">Done</span>${nl2br(h.completed)}</div>` : ''}
+            ${h.moved ? `<div class="history-row"><span class="history-label">Moved</span>${nl2br(h.moved)}</div>` : ''}
+            ${h.waiting ? `<div class="history-row"><span class="history-label">Wait</span>${nl2br(h.waiting)}</div>` : ''}
+          </div>
+        `).join('')}
+      </div>
+    ` : ''}
+  `;
+  document.querySelectorAll('[data-sd]').forEach(ta => {
+    ta.addEventListener('input', e => {
+      state.shutdown[ta.dataset.sd] = e.target.value;
+      saveState();
+      // Re-enable button without full rerender
+      const btn = document.getElementById('closeDayBtn');
+      const s = state.shutdown;
+      btn.disabled = !(s.completed.trim() || s.moved.trim() || s.waiting.trim());
+    });
+  });
+  document.getElementById('closeDayBtn').addEventListener('click', () => {
+    const entry = {
+      date: todayKey(),
+      ts: Date.now(),
+      completed: state.shutdown.completed,
+      moved: state.shutdown.moved,
+      waiting: state.shutdown.waiting,
+      priorities: state.today.items.filter(x => x.trim()),
+      dumpSnapshot: state.brainDump,
+    };
+    state.history.unshift(entry);
+    state.history = state.history.slice(0, 30);
+    state.shutdown = { date: todayKey(), completed: '', moved: '', waiting: '' };
+    state.brainDump = '';
+    state.today = { date: todayKey(), items: ['', '', ''] };
+    saveState();
+    showToast('Day closed. Sleep well.');
+    render();
+  });
+}
+function sdField(num, label, sub, field, val) {
+  return `
+    <div class="sd-field">
+      <div class="sd-head">
+        <span class="sd-num">${num}</span>
+        <div>
+          <div class="sd-label">${label}</div>
+          <div class="sd-sub">${sub}</div>
+        </div>
+      </div>
+      <textarea class="sd-textarea" data-sd="${field}" rows="3" placeholder="…">${escapeHtml(val)}</textarea>
+    </div>
+  `;
+}
+
+// ============ SETTINGS ============
+function renderSettings(root) {
+  root.innerHTML = `
+    <div class="section-head">
+      <div class="eyebrow">Data</div>
+      <h1>Your second brain.</h1>
+      <p class="sub">Everything lives on this device. Back up regularly — clearing browser data will erase it.</p>
+    </div>
+    <div class="stats-row">
+      <div class="stat-box"><div class="stat-num">${state.captures.length}</div><div class="stat-label">Captures</div></div>
+      <div class="stat-box"><div class="stat-num">${state.queue.length}</div><div class="stat-label">In Queue</div></div>
+      <div class="stat-box"><div class="stat-num">${state.history.length}</div><div class="stat-label">Days Closed</div></div>
+      <div class="stat-box"><div class="stat-num">${Math.round(JSON.stringify(state).length / 1024)}<span style="font-size:14px;">kb</span></div><div class="stat-label">Total Size</div></div>
+    </div>
+    <div class="settings-section">
+      <div class="settings-section-title">Backup</div>
+      <button class="setting-btn" id="exportBtn">
+        <div class="setting-icon">${icons.download}</div>
+        <div class="setting-content">
+          <div class="setting-title">Export to file</div>
+          <div class="setting-desc">Download everything as JSON. Save to Drive or email to yourself.</div>
+        </div>
+      </button>
+      <button class="setting-btn" id="importBtn">
+        <div class="setting-icon">${icons.upload}</div>
+        <div class="setting-content">
+          <div class="setting-title">Import from file</div>
+          <div class="setting-desc">Restore a previous backup. Replaces current data.</div>
+        </div>
+      </button>
+      <input type="file" id="importFile" accept="application/json,.json" style="display:none" />
+    </div>
+    <div class="settings-section">
+      <div class="settings-section-title">Danger Zone</div>
+      <button class="setting-btn setting-danger" id="clearBtn">
+        <div class="setting-icon">${icons.trashBig}</div>
+        <div class="setting-content">
+          <div class="setting-title">Erase everything</div>
+          <div class="setting-desc">Permanently delete all captures, queue, history, and notes.</div>
+        </div>
+      </button>
+    </div>
+  `;
+  document.getElementById('exportBtn').addEventListener('click', exportData);
+  document.getElementById('importBtn').addEventListener('click', () => document.getElementById('importFile').click());
+  document.getElementById('importFile').addEventListener('change', importData);
+  document.getElementById('clearBtn').addEventListener('click', () => {
+    if (!confirm('Erase ALL data permanently? This cannot be undone.')) return;
+    if (!confirm('Really sure? Export a backup first if you might want it back.')) return;
+    state = { ...defaultState };
+    rolloverIfNeeded();
+    saveState();
+    showToast('Everything cleared');
+    render();
+  });
+}
+
+function exportData() {
+  const data = JSON.stringify({ version: 1, exportedAt: new Date().toISOString(), data: state }, null, 2);
+  const blob = new Blob([data], { type: 'application/json' });
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement('a');
+  a.href = url;
+  a.download = `ledger-backup-${todayKey()}.json`;
+  document.body.appendChild(a);
+  a.click();
+  document.body.removeChild(a);
+  URL.revokeObjectURL(url);
+  showToast('Backup downloaded');
+}
+function importData(e) {
+  const file = e.target.files[0];
+  if (!file) return;
+  if (!confirm('Importing will REPLACE all current data. Continue?')) { e.target.value = ''; return; }
+  const reader = new FileReader();
+  reader.onload = (ev) => {
+    try {
+      const parsed = JSON.parse(ev.target.result);
+      const incoming = parsed.data || parsed;
+      state = { ...defaultState, ...incoming };
+      rolloverIfNeeded();
+      saveState();
+      showToast('Data restored');
+      render();
+    } catch (err) {
+      alert('Could not read this file. Make sure it is a Ledger backup.');
+    }
+    e.target.value = '';
+  };
+  reader.readAsText(file);
+}
+
+// ============ TOAST ============
+function showToast(msg) {
+  const root = document.getElementById('toast-root');
+  root.innerHTML = `<div class="toast">${escapeHtml(msg)}</div>`;
+  setTimeout(() => { if (root.firstChild) root.innerHTML = ''; }, 2200);
+}
+
+// ============ INSTALL PROMPT ============
+window.addEventListener('beforeinstallprompt', (e) => {
+  e.preventDefault();
+  deferredInstallPrompt = e;
+  if (!localStorage.getItem('ledger_install_dismissed')) showInstallBanner();
+});
+function showInstallBanner() {
+  document.getElementById('install-root').innerHTML = `
+    <div class="install-banner">
+      <div class="install-banner-text">Install Ledger as an app for faster access and offline use.</div>
+      <button class="install-banner-btn" id="installAccept">Install</button>
+      <button class="install-banner-close" id="installDismiss">${icons.xBig}</button>
+    </div>
+  `;
+  document.getElementById('installAccept').addEventListener('click', async () => {
+    if (deferredInstallPrompt) {
+      deferredInstallPrompt.prompt();
+      await deferredInstallPrompt.userChoice;
+      deferredInstallPrompt = null;
+    }
+    document.getElementById('install-root').innerHTML = '';
+  });
+  document.getElementById('installDismiss').addEventListener('click', () => {
+    localStorage.setItem('ledger_install_dismissed', '1');
+    document.getElementById('install-root').innerHTML = '';
+  });
+}
+
+// ============ SERVICE WORKER for offline ============
+if ('serviceWorker' in navigator) {
+  const swCode = `
+    const CACHE = 'ledger-v1';
+    self.addEventListener('install', e => { self.skipWaiting(); });
+    self.addEventListener('activate', e => { e.waitUntil(self.clients.claim()); });
+    self.addEventListener('fetch', e => {
+      if (e.request.method !== 'GET') return;
+      e.respondWith(
+        caches.open(CACHE).then(cache =>
+          cache.match(e.request).then(cached => {
+            const fetchPromise = fetch(e.request).then(resp => {
+              if (resp && resp.status === 200) cache.put(e.request, resp.clone());
+              return resp;
+            }).catch(() => cached);
+            return cached || fetchPromise;
+          })
+        )
+      );
+    });
+  `;
+  const blob = new Blob([swCode], { type: 'application/javascript' });
+  const swUrl = URL.createObjectURL(blob);
+  navigator.serviceWorker.register(swUrl).catch(() => {/* offline cache optional */});
+}
+
+// ============ BOOT ============
+render();
+</script>
+</body>
+</html>
