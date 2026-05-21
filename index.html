@@ -455,4 +455,1782 @@
     font-family: var(--serif);
   }
   .header-menu-item:hover, .header-menu-item:active { background: var(--line-soft); }
-  .header-menu-icon { color: var(--ac
+  .header-menu-icon { color: var(--accent); display: flex; }
+  .menu-divider { height: 1px; background: var(--line); margin: 6px 0; }
+
+  /* Domains */
+  .domain-card {
+    background: var(--bg-card); border: 1px solid var(--line);
+    border-radius: 4px; padding: 14px 16px; margin-bottom: 10px;
+    display: flex; gap: 12px; align-items: flex-start;
+  }
+  .domain-order { display: flex; flex-direction: column; gap: 2px; padding-top: 2px; }
+  .domain-order-btn {
+    color: var(--ink-muted); padding: 2px; display: flex;
+    align-items: center; justify-content: center;
+  }
+  .domain-order-btn:disabled { opacity: 0.25; }
+  .domain-body { flex: 1; min-width: 0; }
+  .domain-head {
+    display: flex; justify-content: space-between; align-items: flex-start;
+    gap: 10px; margin-bottom: 8px;
+  }
+  .domain-name {
+    font-size: 16px; font-weight: 500; line-height: 1.3;
+    flex: 1; word-break: break-word;
+  }
+  .domain-status-pill {
+    font-size: 9px; padding: 3px 7px; border-radius: 2px;
+    text-transform: uppercase; letter-spacing: 0.08em;
+    font-family: var(--mono); white-space: nowrap;
+  }
+  .ds-manual { background: transparent; border: 1px solid var(--ink-muted); color: var(--ink-muted); }
+  .ds-drafted { background: transparent; border: 1px solid var(--accent); color: var(--accent); }
+  .ds-inuse { background: var(--accent); color: var(--bg); }
+  .ds-delegated { background: #b08858; color: var(--bg); }
+  .ds-systemized { background: var(--signal); color: var(--bg); }
+
+  .domain-meta {
+    display: flex; flex-wrap: wrap; gap: 6px; margin-bottom: 8px;
+    font-size: 11px; color: var(--ink-muted); font-family: var(--mono);
+  }
+  .domain-meta-item {
+    display: inline-flex; align-items: center; gap: 4px;
+  }
+  .domain-meta-dots { display: inline-flex; gap: 2px; }
+  .domain-dot {
+    width: 6px; height: 6px; border-radius: 50%;
+    background: var(--line);
+  }
+  .domain-dot.filled { background: var(--accent); }
+
+  .domain-intervention {
+    font-size: 13px; line-height: 1.45; color: var(--ink);
+    background: var(--line-soft); padding: 8px 10px;
+    border-radius: 3px; margin-bottom: 8px;
+  }
+  .domain-intervention .domain-int-label {
+    font-size: 9px; text-transform: uppercase; letter-spacing: 0.1em;
+    color: var(--accent); font-family: var(--mono); font-weight: 600;
+    margin-right: 6px;
+  }
+  .domain-intervention.empty {
+    background: transparent; border: 1px dashed var(--line);
+    color: var(--ink-muted); font-style: italic;
+  }
+
+  .domain-counts {
+    display: flex; gap: 14px; font-size: 11px;
+    color: var(--ink-muted); font-family: var(--mono);
+    padding-top: 6px; border-top: 1px solid var(--line-soft);
+  }
+  .domain-counts strong { color: var(--ink-soft); font-weight: 500; }
+
+  .domain-add-btn {
+    width: 100%; display: flex; align-items: center; justify-content: center;
+    gap: 8px; padding: 14px; background: transparent;
+    border: 1px dashed var(--line); border-radius: 4px;
+    color: var(--ink-soft); font-family: var(--mono);
+    font-size: 12px; text-transform: uppercase; letter-spacing: 0.06em;
+    margin-bottom: 16px;
+  }
+
+  /* Domain edit sheet */
+  .status-grid {
+    display: grid; grid-template-columns: 1fr 1fr; gap: 6px;
+    margin-bottom: 18px;
+  }
+  .status-opt {
+    padding: 10px 8px; border: 1px solid var(--line);
+    border-radius: 2px; font-size: 11px; font-family: var(--mono);
+    text-transform: uppercase; letter-spacing: 0.06em;
+    color: var(--ink-soft); text-align: center;
+    transition: all 0.15s;
+  }
+  .status-opt.active { background: var(--ink); color: var(--bg); border-color: var(--ink); }
+
+  .cadence-row {
+    display: flex; gap: 6px; margin-bottom: 18px;
+  }
+  .cadence-opt {
+    flex: 1; padding: 10px 6px; border: 1px solid var(--line);
+    border-radius: 2px; font-size: 11px; font-family: var(--mono);
+    text-transform: uppercase; letter-spacing: 0.06em;
+    color: var(--ink-soft); text-align: center;
+  }
+  .cadence-opt.active { background: var(--ink); color: var(--bg); border-color: var(--ink); }
+
+  /* Domain tag on queue items */
+  .tag-domain {
+    background: var(--accent); color: var(--bg);
+    display: inline-flex; align-items: center; gap: 4px;
+  }
+
+  /* Promote modal — domain select */
+  .domain-select-grid {
+    display: flex; flex-wrap: wrap; gap: 6px; margin-bottom: 18px;
+  }
+  .domain-select-opt {
+    padding: 8px 12px; border: 1px solid var(--line);
+    border-radius: 2px; font-size: 12px; color: var(--ink-soft);
+    font-family: var(--serif);
+  }
+  .domain-select-opt.active {
+    background: var(--accent); color: var(--bg); border-color: var(--accent);
+  }
+  .domain-select-empty {
+    padding: 12px 14px; background: var(--line-soft);
+    border-radius: 4px; font-size: 12px; color: var(--ink-soft);
+    line-height: 1.5; margin-bottom: 18px;
+  }
+
+  /* Confirm */
+  .confirm-overlay {
+    position: fixed; inset: 0; background: rgba(26,22,18,0.6);
+    z-index: 150; display: flex; align-items: center; justify-content: center;
+    padding: 20px; animation: fadeIn 0.15s ease;
+  }
+  .confirm-box {
+    background: var(--bg); border-radius: 8px; max-width: 360px; width: 100%;
+    padding: 24px 22px;
+    animation: slideUp 0.2s cubic-bezier(.2,.8,.2,1);
+  }
+  .confirm-title { font-size: 18px; font-style: italic; font-weight: 500; margin-bottom: 8px; line-height: 1.3; }
+  .confirm-message { font-size: 14px; color: var(--ink-soft); line-height: 1.5; margin-bottom: 20px; }
+  .confirm-actions { display: flex; gap: 8px; }
+  .confirm-cancel {
+    flex: 1; padding: 12px; border: 1px solid var(--line);
+    border-radius: 2px; font-size: 12px; font-family: var(--mono);
+    text-transform: uppercase; letter-spacing: 0.06em; color: var(--ink-soft);
+  }
+  .confirm-ok {
+    flex: 1; padding: 12px; background: var(--ink); color: var(--bg);
+    border-radius: 2px; font-size: 12px; font-family: var(--mono);
+    text-transform: uppercase; letter-spacing: 0.06em; font-weight: 500;
+  }
+  .confirm-ok.danger { background: #991b1b; }
+
+  /* Toast */
+  .toast {
+    position: fixed; bottom: calc(110px + env(safe-area-inset-bottom));
+    left: 50%; transform: translateX(-50%);
+    background: var(--ink); color: var(--bg);
+    padding: 12px 20px; border-radius: 4px;
+    font-size: 13px; font-family: var(--mono);
+    letter-spacing: 0.04em; z-index: 200;
+    animation: slideUp 0.25s ease;
+  }
+
+  /* Tabbar */
+  .tabbar {
+    position: fixed; bottom: 0; left: 0; right: 0;
+    background: rgba(246, 241, 232, 0.92);
+    backdrop-filter: blur(12px); -webkit-backdrop-filter: blur(12px);
+    border-top: 1px solid var(--line);
+    display: flex; justify-content: space-around;
+    padding: 10px 4px calc(18px + env(safe-area-inset-bottom));
+    z-index: 50;
+  }
+  .tab-btn {
+    flex: 1; display: flex; flex-direction: column; align-items: center;
+    gap: 4px; padding: 6px 2px; position: relative;
+    color: var(--ink-muted);
+  }
+  .tab-btn.active { color: var(--ink); }
+  .tab-btn svg { stroke-width: 1.5; }
+  .tab-btn.active svg { stroke-width: 2.2; }
+  .tab-label {
+    font-size: 9px; letter-spacing: 0.06em; text-transform: uppercase;
+    font-family: var(--mono); font-weight: 400;
+  }
+  .tab-btn.active .tab-label { font-weight: 600; }
+  .active-dot {
+    position: absolute; bottom: -2px;
+    width: 4px; height: 4px; border-radius: 50%;
+    background: var(--accent);
+  }
+
+  .install-banner {
+    position: fixed; bottom: calc(110px + env(safe-area-inset-bottom));
+    left: 16px; right: 16px;
+    background: var(--ink); color: var(--bg);
+    padding: 14px 16px; border-radius: 6px;
+    display: flex; align-items: center; gap: 12px;
+    z-index: 60; animation: slideUp 0.3s ease;
+  }
+  .install-banner-text { flex: 1; font-size: 13px; line-height: 1.4; }
+  .install-banner-btn {
+    color: var(--bg); font-family: var(--mono);
+    font-size: 12px; padding: 8px 12px; border: 1px solid var(--bg);
+    border-radius: 2px; text-transform: uppercase; letter-spacing: 0.06em;
+  }
+  .install-banner-close { color: var(--bg); padding: 4px; }
+</style>
+</head>
+<body>
+
+<header class="header" style="position:relative;">
+  <div class="header-inner">
+    <div class="brand">
+      <span class="brand-mark">§</span>
+      <span class="brand-text">Ledger</span>
+    </div>
+    <div class="header-right">
+      <div class="date-text" id="dateText"></div>
+      <button class="header-btn" id="menuBtn" aria-label="Menu">
+        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><circle cx="12" cy="5" r="1.2"/><circle cx="12" cy="12" r="1.2"/><circle cx="12" cy="19" r="1.2"/></svg>
+      </button>
+    </div>
+  </div>
+  <div id="header-menu-root"></div>
+</header>
+
+<main id="main"></main>
+
+<nav class="tabbar" id="tabbar"></nav>
+
+<div id="modal-root"></div>
+<div id="confirm-root"></div>
+<div id="toast-root"></div>
+<div id="install-root"></div>
+
+<script>
+// ============ STATE ============
+const STORAGE_KEY = 'ledger_v1';
+const defaultState = {
+  captures: [],         // { id, text, ts, kind: 'signal' | 'noise' }
+  queue: [],            // { id, problem, why, frequency, impact, recurring, dataSolvable, score, ts, structure?, layers?, domainId? }
+  domains: [],          // { id, name, youDep, status, intervention, sop, cadence, ts, reviewedAt }
+  today: { date: '', items: ['', '', ''] },
+  brainDump: '',
+  shutdown: { date: '', completed: '', moved: '', waiting: '' },
+  history: [],
+  deepWork: [],         // { id, queueId, problemText, problem, objective, variables, output, nextAction, ts, domainId? }
+};
+
+let state = loadState();
+let currentTab = 'capture';
+let promoting = null;
+let structuring = null;     // queue item being structured
+let deepWorking = null;     // queue item being deep-worked
+let dwDraft = { problem: '', objective: '', variables: '', output: '', nextAction: '' };
+
+function loadState() {
+  try {
+    const raw = localStorage.getItem(STORAGE_KEY);
+    if (!raw) return JSON.parse(JSON.stringify(defaultState));
+    const parsed = JSON.parse(raw);
+    return { ...JSON.parse(JSON.stringify(defaultState)), ...parsed };
+  } catch {
+    return JSON.parse(JSON.stringify(defaultState));
+  }
+}
+function saveState() {
+  try { localStorage.setItem(STORAGE_KEY, JSON.stringify(state)); }
+  catch (e) { console.error('Save failed', e); }
+}
+
+function todayKey() { return new Date().toISOString().slice(0, 10); }
+
+function rolloverIfNeeded() {
+  const tk = todayKey();
+  if (state.today.date !== tk) state.today = { date: tk, items: ['', '', ''] };
+  if (state.shutdown.date !== tk) state.shutdown = { date: tk, completed: '', moved: '', waiting: '' };
+  // Auto-archive noise captures older than 30 days
+  const cutoff = Date.now() - 30 * 24 * 60 * 60 * 1000;
+  state.captures = state.captures.filter(c => !(c.kind === 'noise' && c.ts < cutoff));
+  saveState();
+}
+rolloverIfNeeded();
+
+function formatDate(d) {
+  return d.toLocaleDateString('en-US', { weekday: 'long', month: 'long', day: 'numeric' });
+}
+function timeAgo(ts) {
+  const s = Math.floor((Date.now() - ts) / 1000);
+  if (s < 60) return 'just now';
+  if (s < 3600) return Math.floor(s / 60) + 'm';
+  if (s < 86400) return Math.floor(s / 3600) + 'h';
+  return Math.floor(s / 86400) + 'd';
+}
+function escapeHtml(s) {
+  return String(s == null ? '' : s).replace(/[&<>"']/g, c => ({ '&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;' }[c]));
+}
+function nl2br(s) { return escapeHtml(s).replace(/\n/g, '<br>'); }
+
+function isStructured(q) {
+  return q.structure && (
+    (q.structure.what || '').trim() ||
+    (q.structure.why || '').trim() ||
+    (q.structure.frequency || '').trim() ||
+    (q.structure.damage || '').trim()
+  ) && (q.layers && q.layers.filter(l => l.trim()).length > 0);
+}
+
+// ============ ICONS ============
+const icons = {
+  inbox: '<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor"><polyline points="22 12 16 12 14 15 10 15 8 12 2 12"/><path d="M5.45 5.11 2 12v6a2 2 0 0 0 2 2h16a2 2 0 0 0 2-2v-6l-3.45-6.89A2 2 0 0 0 16.76 4H7.24a2 2 0 0 0-1.79 1.11z"/></svg>',
+  list: '<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor"><path d="m3 17 2 2 4-4"/><path d="m3 7 2 2 4-4"/><path d="M13 6h8"/><path d="M13 12h8"/><path d="M13 18h8"/></svg>',
+  sun: '<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor"><circle cx="12" cy="12" r="4"/><path d="M12 2v2"/><path d="M12 20v2"/><path d="m4.93 4.93 1.41 1.41"/><path d="m17.66 17.66 1.41 1.41"/><path d="M2 12h2"/><path d="M20 12h2"/><path d="m6.34 17.66-1.41 1.41"/><path d="m19.07 4.93-1.41 1.41"/></svg>',
+  brain: '<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor"><path d="M12 5a3 3 0 1 0-5.997.125 4 4 0 0 0-2.526 5.77 4 4 0 0 0 .556 6.588A4 4 0 1 0 12 18Z"/><path d="M12 5a3 3 0 1 1 5.997.125 4 4 0 0 1 2.526 5.77 4 4 0 0 1-.556 6.588A4 4 0 1 1 12 18Z"/><path d="M15 13a4.5 4.5 0 0 1-3-4 4.5 4.5 0 0 1-3 4"/></svg>',
+  archive: '<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor"><rect width="20" height="5" x="2" y="3" rx="1"/><path d="M4 8v11a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8"/><path d="M10 12h4"/></svg>',
+  moon: '<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor"><path d="M12 3a6 6 0 0 0 9 9 9 9 0 1 1-9-9Z"/></svg>',
+  settings: '<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1 0 2.83 2 2 0 0 1-2.83 0l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-2 2 2 2 0 0 1-2-2v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83 0 2 2 0 0 1 0-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1-2-2 2 2 0 0 1 2-2h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 0-2.83 2 2 0 0 1 2.83 0l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 2-2 2 2 0 0 1 2 2v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 0 2 2 0 0 1 0 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 2 2 2 2 0 0 1-2 2h-.09a1.65 1.65 0 0 0-1.51 1z"/></svg>',
+  plus: '<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M5 12h14"/><path d="M12 5v14"/></svg>',
+  x: '<svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M18 6 6 18"/><path d="m6 6 12 12"/></svg>',
+  xBig: '<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M18 6 6 18"/><path d="m6 6 12 12"/></svg>',
+  check: '<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="20 6 9 17 4 12"/></svg>',
+  checkSmall: '<svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="20 6 9 17 4 12"/></svg>',
+  checkTiny: '<svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"><polyline points="20 6 9 17 4 12"/></svg>',
+  arrowUp: '<svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M7 7h10v10"/><path d="M7 17 17 7"/></svg>',
+  trash: '<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6"><path d="M3 6h18"/><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6"/><path d="M8 6V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"/></svg>',
+  edit: '<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/></svg>',
+  chevronRight: '<svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6"><path d="m9 18 6-6-6-6"/></svg>',
+  chevronDown: '<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="m6 9 6 6 6-6"/></svg>',
+  chevronUp: '<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="m18 15-6-6-6 6"/></svg>',
+  download: '<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" x2="12" y1="15" y2="3"/></svg>',
+  upload: '<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="17 8 12 3 7 8"/><line x1="12" x2="12" y1="3" y2="15"/></svg>',
+  trashBig: '<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6"><path d="M3 6h18"/><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6"/></svg>',
+  signal: '<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M2 20h.01"/><path d="M7 20v-4"/><path d="M12 20v-8"/><path d="M17 20V8"/><path d="M22 4v16"/></svg>',
+  noise: '<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M2 10s3-3 3-8"/><path d="M22 10s-3-3-3-8"/><path d="M10 6c0 4.4-3.6 8-8 8"/><path d="M14 6c0 4.4 3.6 8 8 8"/><path d="M2 14h20"/><path d="M5 19h14"/></svg>',
+  info: '<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><circle cx="12" cy="12" r="10"/><path d="M12 16v-4"/><path d="M12 8h.01"/></svg>',
+  layers: '<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><polygon points="12 2 2 7 12 12 22 7 12 2"/><polyline points="2 17 12 22 22 17"/><polyline points="2 12 12 17 22 12"/></svg>',
+};
+
+// ============ RENDER ============
+function render() {
+  rolloverIfNeeded();
+  document.getElementById('dateText').textContent = formatDate(new Date());
+  renderTabbar();
+  renderMain();
+}
+
+function renderTabbar() {
+  const tabs = [
+    { id: 'capture', label: 'Capture', icon: icons.inbox },
+    { id: 'queue', label: 'Queue', icon: icons.list },
+    { id: 'today', label: 'Today', icon: icons.sun },
+    { id: 'domains', label: 'Domains', icon: icons.layers },
+    { id: 'deepwork', label: 'Deep', icon: icons.brain },
+    { id: 'dump', label: 'Dump', icon: icons.archive },
+    { id: 'shutdown', label: 'Close', icon: icons.moon },
+  ];
+  document.getElementById('tabbar').innerHTML = tabs.map(t => `
+    <button class="tab-btn ${currentTab === t.id ? 'active' : ''}" data-tab="${t.id}">
+      ${t.icon}
+      <span class="tab-label">${t.label}</span>
+      ${currentTab === t.id ? '<div class="active-dot"></div>' : ''}
+    </button>
+  `).join('');
+  document.querySelectorAll('[data-tab]').forEach(btn => {
+    btn.addEventListener('click', () => { currentTab = btn.dataset.tab; render(); });
+  });
+}
+
+function renderMain() {
+  const m = document.getElementById('main');
+  if (currentTab === 'capture') renderCapture(m);
+  else if (currentTab === 'queue') renderQueue(m);
+  else if (currentTab === 'today') renderToday(m);
+  else if (currentTab === 'domains') renderDomains(m);
+  else if (currentTab === 'deepwork') renderDeepWork(m);
+  else if (currentTab === 'dump') renderDump(m);
+  else if (currentTab === 'shutdown') renderShutdown(m);
+  else if (currentTab === 'settings') renderSettings(m);
+}
+
+// ============ HEADER MENU ============
+function toggleHeaderMenu() {
+  const root = document.getElementById('header-menu-root');
+  if (root.innerHTML.trim()) { root.innerHTML = ''; return; }
+  root.innerHTML = `
+    <div class="header-menu" id="headerMenu">
+      <button class="header-menu-item" data-menu-tab="settings">
+        <span class="header-menu-icon">${icons.settings}</span>
+        <span>Data &amp; Backup</span>
+      </button>
+      <button class="header-menu-item" data-menu-action="export">
+        <span class="header-menu-icon">${icons.download}</span>
+        <span>Quick Export</span>
+      </button>
+    </div>
+  `;
+  setTimeout(() => {
+    document.addEventListener('click', closeHeaderMenuOnOutside, { once: true });
+  }, 0);
+  document.querySelectorAll('[data-menu-tab]').forEach(b => {
+    b.addEventListener('click', (e) => {
+      e.stopPropagation();
+      currentTab = b.dataset.menuTab;
+      root.innerHTML = '';
+      render();
+    });
+  });
+  document.querySelectorAll('[data-menu-action]').forEach(b => {
+    b.addEventListener('click', (e) => {
+      e.stopPropagation();
+      root.innerHTML = '';
+      if (b.dataset.menuAction === 'export') exportData();
+    });
+  });
+}
+function closeHeaderMenuOnOutside(e) {
+  const root = document.getElementById('header-menu-root');
+  if (root && !root.contains(e.target) && e.target.id !== 'menuBtn' && !e.target.closest('#menuBtn')) {
+    root.innerHTML = '';
+  }
+}
+
+// ============ CAPTURE ============
+function renderCapture(root) {
+  const signals = state.captures.filter(c => c.kind !== 'noise');
+  const noise = state.captures.filter(c => c.kind === 'noise');
+
+  root.innerHTML = `
+    <div class="section-head">
+      <div class="eyebrow">Inbox</div>
+      <h1>Capture, don't solve.</h1>
+      <p class="sub">Drop the thought. Then decide if it's signal or noise. Don't try to solve it yet.</p>
+    </div>
+    <div class="capture-box">
+      <textarea class="capture-textarea" id="captureText" placeholder="What did you notice?" rows="3"></textarea>
+      <div class="capture-actions">
+        <button class="btn-noise" id="captureNoiseBtn" disabled>${icons.noise}<span>Park as Noise</span></button>
+        <button class="btn-signal" id="captureSignalBtn" disabled>${icons.signal}<span>Mark Signal</span></button>
+      </div>
+      <div class="capture-hint">
+        <strong>Signal:</strong> recurring · measurable · operationally real · systemizable<br>
+        <strong>Noise:</strong> hypothetical · rare · emotionally exciting but operationally weak
+      </div>
+    </div>
+
+    <div class="divider"><span class="divider-text">${signals.length === 0 ? 'No signal yet' : signals.length + ' signal'}</span></div>
+    <div class="list" id="signalList">
+      ${signals.length === 0 ? '<div class="empty">Nothing captured as signal yet.</div>' :
+        signals.map(c => captureCardHTML(c, false)).join('')
+      }
+    </div>
+
+    ${noise.length > 0 ? `
+      <div class="divider expandable" id="noiseDivider">
+        ${icons.chevronDown}
+        <span class="divider-text">${noise.length} parked as noise</span>
+      </div>
+      <div id="noiseList" style="display:none;">
+        <div class="list">
+          ${noise.map(c => captureCardHTML(c, true)).join('')}
+        </div>
+        <p class="sub" style="margin-top:12px;font-size:12px;">Auto-archived after 30 days. Useful to see your own noise pattern.</p>
+      </div>
+    ` : ''}
+  `;
+
+  const ta = document.getElementById('captureText');
+  const sigBtn = document.getElementById('captureSignalBtn');
+  const noiseBtn = document.getElementById('captureNoiseBtn');
+  ta.addEventListener('input', () => {
+    const has = !!ta.value.trim();
+    sigBtn.disabled = !has;
+    noiseBtn.disabled = !has;
+  });
+  sigBtn.addEventListener('click', () => doCapture(ta, 'signal'));
+  noiseBtn.addEventListener('click', () => doCapture(ta, 'noise'));
+
+  if (noise.length > 0) {
+    const divider = document.getElementById('noiseDivider');
+    const list = document.getElementById('noiseList');
+    divider.addEventListener('click', () => {
+      const open = list.style.display !== 'none';
+      list.style.display = open ? 'none' : 'block';
+      divider.querySelector('svg').outerHTML = open ? icons.chevronDown : icons.chevronUp;
+    });
+  }
+
+  // Bind action handlers
+  document.querySelectorAll('[data-promote]').forEach(b => {
+    b.addEventListener('click', () => {
+      const id = Number(b.dataset.promote);
+      promoting = state.captures.find(c => c.id === id);
+      openPromoteModal();
+    });
+  });
+  document.querySelectorAll('[data-toggle-kind]').forEach(b => {
+    b.addEventListener('click', () => {
+      const id = Number(b.dataset.toggleKind);
+      const c = state.captures.find(c => c.id === id);
+      if (!c) return;
+      c.kind = c.kind === 'noise' ? 'signal' : 'noise';
+      saveState();
+      render();
+    });
+  });
+  document.querySelectorAll('[data-remove-capture]').forEach(b => {
+    b.addEventListener('click', () => {
+      const id = Number(b.dataset.removeCapture);
+      const item = state.captures.find(c => c.id === id);
+      if (!item) return;
+      confirmDialog({
+        title: 'Discard this capture?',
+        message: `"${item.text.length > 80 ? item.text.slice(0, 80) + '…' : item.text}"`,
+        okText: 'Discard',
+        onConfirm: () => {
+          state.captures = state.captures.filter(c => c.id !== id);
+          saveState();
+          render();
+        },
+      });
+    });
+  });
+}
+
+function doCapture(ta, kind) {
+  if (!ta.value.trim()) return;
+  state.captures.unshift({ id: Date.now(), text: ta.value.trim(), ts: Date.now(), kind });
+  saveState();
+  ta.value = '';
+  render();
+}
+
+function captureCardHTML(c, isNoise) {
+  return `
+    <div class="capture-card ${isNoise ? 'noise' : ''}">
+      <div class="capture-text">${nl2br(c.text)}</div>
+      <div class="capture-meta">
+        <div class="capture-meta-left">
+          <span class="capture-time">${timeAgo(c.ts)}</span>
+          ${isNoise ? '<span class="noise-badge">noise</span>' : ''}
+        </div>
+        <div class="capture-actions">
+          ${!isNoise ? `<button class="icon-btn" data-promote="${c.id}" title="Score & queue">${icons.arrowUp}</button>` : ''}
+          <button class="icon-btn" data-toggle-kind="${c.id}" title="${isNoise ? 'Move to signal' : 'Move to noise'}">${isNoise ? icons.signal : icons.noise}</button>
+          <button class="icon-btn" data-remove-capture="${c.id}" title="Discard">${icons.x}</button>
+        </div>
+      </div>
+    </div>
+  `;
+}
+
+// ============ PROMOTE MODAL ============
+let promoteState = { why: '', frequency: 3, impact: 3, recurring: true, dataSolvable: false, domainId: null };
+
+function openPromoteModal() {
+  promoteState = { why: '', frequency: 3, impact: 3, recurring: true, dataSolvable: false, domainId: null };
+  document.getElementById('modal-root').innerHTML = `
+    <div class="modal-overlay" id="modalOverlay">
+      <div class="modal" id="modalBody">
+        <div class="modal-head">
+          <div class="modal-eyebrow">Promote to Queue</div>
+          <button class="icon-btn" id="closeModal">${icons.xBig}</button>
+        </div>
+        <div class="modal-problem">"${escapeHtml(promoting.text)}"</div>
+        <label class="label">Why does it matter?</label>
+        <textarea class="field-textarea" id="whyInput" rows="2" placeholder="Lost orders? Cash trapped? Recurring delay?"></textarea>
+        <div class="scale-row">
+          <div class="scale-head">
+            <span class="scale-label">Frequency</span>
+            <span class="scale-val" id="freqVal">${promoteState.frequency}</span>
+          </div>
+          <div class="scale-sub">How often does it surface?</div>
+          <div class="scale-btns" id="freqPips"></div>
+          <div class="scale-bounds"><span>Rare</span><span>Constant</span></div>
+        </div>
+        <div class="scale-row">
+          <div class="scale-head">
+            <span class="scale-label">Impact</span>
+            <span class="scale-val" id="impactVal">${promoteState.impact}</span>
+          </div>
+          <div class="scale-sub">If unsolved, what is the cost?</div>
+          <div class="scale-btns" id="impactPips"></div>
+          <div class="scale-bounds"><span>Minor</span><span>Severe</span></div>
+        </div>
+        <div class="check-row">
+          <button class="check-opt" id="recurringBtn"><span id="recurringIcon"></span><span>Recurring pattern</span></button>
+          <button class="check-opt" id="dataSolvableBtn"><span id="dataSolvableIcon"></span><span>Data can solve it</span></button>
+        </div>
+        <label class="label" style="margin-top:20px;">Domain<span class="label-sub">Which recurring stream of work does this belong to?</span></label>
+        <div id="domainSelectArea"></div>
+        <div class="score-box">
+          <div class="score-label">Priority score</div>
+          <div class="score-val" id="scoreVal">${computeScore()}</div>
+        </div>
+        <button class="btn-primary-full" id="confirmPromote">${icons.check}<span>Move to Queue</span></button>
+      </div>
+    </div>
+  `;
+  document.getElementById('modalOverlay').addEventListener('click', closeModal);
+  document.getElementById('modalBody').addEventListener('click', e => e.stopPropagation());
+  document.getElementById('closeModal').addEventListener('click', closeModal);
+  document.getElementById('whyInput').addEventListener('input', e => { promoteState.why = e.target.value; });
+  document.getElementById('recurringBtn').addEventListener('click', () => toggleCheck('recurring'));
+  document.getElementById('dataSolvableBtn').addEventListener('click', () => toggleCheck('dataSolvable'));
+  document.getElementById('confirmPromote').addEventListener('click', confirmPromote);
+  renderPips('frequency');
+  renderPips('impact');
+  updateCheckUI('recurring');
+  updateCheckUI('dataSolvable');
+  renderDomainSelect();
+}
+
+function renderDomainSelect() {
+  const area = document.getElementById('domainSelectArea');
+  if (!area) return;
+  if (state.domains.length === 0) {
+    area.innerHTML = `
+      <div class="domain-select-empty">
+        No domains yet. You can promote without one — add domains later from the Domains tab and tag this item then.
+      </div>
+    `;
+    return;
+  }
+  area.innerHTML = `
+    <div class="domain-select-grid">
+      <button class="domain-select-opt ${promoteState.domainId === null ? 'active' : ''}" data-dsel="">Untagged</button>
+      ${state.domains.map(d => `
+        <button class="domain-select-opt ${promoteState.domainId === d.id ? 'active' : ''}" data-dsel="${d.id}">${escapeHtml(d.name)}</button>
+      `).join('')}
+    </div>
+  `;
+  area.querySelectorAll('[data-dsel]').forEach(b => {
+    b.addEventListener('click', () => {
+      promoteState.domainId = b.dataset.dsel || null;
+      area.querySelectorAll('[data-dsel]').forEach(x => x.classList.remove('active'));
+      b.classList.add('active');
+    });
+  });
+}
+
+function renderPips(field) {
+  const containerId = field === 'frequency' ? 'freqPips' : 'impactPips';
+  const container = document.getElementById(containerId);
+  const val = promoteState[field];
+  container.innerHTML = [1,2,3,4,5].map(n =>
+    `<button class="scale-pip ${n <= val ? 'active' : ''}" data-pip="${field}:${n}"></button>`
+  ).join('');
+  container.querySelectorAll('[data-pip]').forEach(b => {
+    b.addEventListener('click', () => {
+      const [f, v] = b.dataset.pip.split(':');
+      promoteState[f] = Number(v);
+      renderPips(f);
+      document.getElementById(f === 'frequency' ? 'freqVal' : 'impactVal').textContent = promoteState[f];
+      updateScore();
+    });
+  });
+}
+function toggleCheck(field) {
+  promoteState[field] = !promoteState[field];
+  updateCheckUI(field);
+  updateScore();
+}
+function updateCheckUI(field) {
+  const btnId = field === 'recurring' ? 'recurringBtn' : 'dataSolvableBtn';
+  const iconId = field === 'recurring' ? 'recurringIcon' : 'dataSolvableIcon';
+  const btn = document.getElementById(btnId);
+  const icon = document.getElementById(iconId);
+  if (promoteState[field]) {
+    btn.classList.add('active');
+    icon.innerHTML = icons.checkSmall;
+  } else {
+    btn.classList.remove('active');
+    icon.innerHTML = '';
+  }
+}
+function updateScore() {
+  const el = document.getElementById('scoreVal');
+  if (el) el.textContent = computeScore();
+}
+function confirmPromote() {
+  state.queue.unshift({
+    id: Date.now(),
+    problem: promoting.text,
+    why: promoteState.why.trim(),
+    frequency: promoteState.frequency,
+    impact: promoteState.impact,
+    recurring: promoteState.recurring,
+    dataSolvable: promoteState.dataSolvable,
+    score: computeScore(),
+    ts: Date.now(),
+    structure: null,
+    layers: [],
+    domainId: promoteState.domainId,
+  });
+  state.captures = state.captures.filter(c => c.id !== promoting.id);
+  saveState();
+  promoting = null;
+  closeModal();
+  showToast('Moved to Queue');
+  render();
+}
+function computeScore() {
+  return (promoteState.frequency * promoteState.impact) + (promoteState.recurring ? 5 : 0) + (promoteState.dataSolvable ? 3 : 0);
+}
+function closeModal() {
+  document.getElementById('modal-root').innerHTML = '';
+  promoting = null;
+  structuring = null;
+}
+
+// ============ STRUCTURE SHEET ============
+function openStructureSheet(queueId) {
+  const q = state.queue.find(x => x.id === queueId);
+  if (!q) return;
+  structuring = q;
+  const s = q.structure || { what: '', why: '', frequency: '', damage: '', variable: '' };
+  const layers = (q.layers && q.layers.length ? q.layers : ['', '', '']).slice(0, 6);
+
+  document.getElementById('modal-root').innerHTML = `
+    <div class="modal-overlay" id="modalOverlay">
+      <div class="modal" id="modalBody">
+        <div class="modal-head">
+          <div class="modal-eyebrow">Structure The Problem</div>
+          <button class="icon-btn" id="closeModal">${icons.xBig}</button>
+        </div>
+        <div class="modal-problem">"${escapeHtml(q.problem)}"</div>
+
+        <div class="layers-help">
+          <strong>Vague thoughts create endless loops.</strong> Convert this into a specific, measurable problem the brain can actually work on.
+        </div>
+
+        <div class="structure-field">
+          <label class="label">What exactly is happening?<span class="label-sub">Be operationally specific. Not "inventory is messy" but "out-of-stock items remain in catalog because updates are manual."</span></label>
+          <textarea class="field-textarea" id="sf-what" rows="2">${escapeHtml(s.what)}</textarea>
+        </div>
+        <div class="structure-field">
+          <label class="label">Why does it happen?<span class="label-sub">Root cause, not symptom.</span></label>
+          <textarea class="field-textarea" id="sf-why" rows="2">${escapeHtml(s.why)}</textarea>
+        </div>
+        <div class="structure-field">
+          <label class="label">How often?<span class="label-sub">Concrete frequency. "Every dispatch day" beats "often."</span></label>
+          <input class="field-input" id="sf-frequency" value="${escapeHtml(s.frequency)}" placeholder="e.g. every dispatch day, weekly, per order" />
+        </div>
+        <div class="structure-field">
+          <label class="label">What damage does it cause?<span class="label-sub">Money, time, errors, customer experience.</span></label>
+          <textarea class="field-textarea" id="sf-damage" rows="2">${escapeHtml(s.damage)}</textarea>
+        </div>
+        <div class="structure-field">
+          <label class="label">What variable affects it?<span class="label-sub">Geography, season, retailer type, age group, price range...</span></label>
+          <input class="field-input" id="sf-variable" value="${escapeHtml(s.variable)}" placeholder="e.g. seasonal, retailer-type-dependent" />
+        </div>
+
+        <div class="layers-help" style="margin-top:24px;">
+          <strong>Break into layers.</strong> Don't try to solve the whole system. List smaller progressive steps from observation to systemization.
+        </div>
+        <div id="layersContainer"></div>
+        <button class="btn-secondary-full" id="addLayerBtn" style="margin-top:8px;">${icons.plus}<span>Add Layer</span></button>
+
+        <button class="btn-primary-full" id="saveStructure" style="margin-top:24px;">${icons.check}<span>Save Structure</span></button>
+      </div>
+    </div>
+  `;
+  document.getElementById('modalOverlay').addEventListener('click', closeModal);
+  document.getElementById('modalBody').addEventListener('click', e => e.stopPropagation());
+  document.getElementById('closeModal').addEventListener('click', closeModal);
+
+  // Render layers (dynamic count)
+  let layersState = layers.slice();
+  function renderLayers() {
+    const c = document.getElementById('layersContainer');
+    c.innerHTML = layersState.map((l, i) => `
+      <div style="display:flex;gap:8px;margin-bottom:8px;align-items:flex-start;">
+        <div style="font-family:var(--mono);font-size:11px;color:var(--accent);padding-top:14px;min-width:50px;">Layer ${i+1}</div>
+        <input class="field-input" data-layer="${i}" value="${escapeHtml(l)}" placeholder="${i === 0 ? 'e.g. Track repeat retailer demand manually' : 'next progressive step'}" style="margin-bottom:0;flex:1;" />
+        ${layersState.length > 1 ? `<button class="icon-btn" data-remove-layer="${i}" style="padding-top:14px;">${icons.x}</button>` : ''}
+      </div>
+    `).join('');
+    c.querySelectorAll('[data-layer]').forEach(inp => {
+      inp.addEventListener('input', e => { layersState[Number(inp.dataset.layer)] = e.target.value; });
+    });
+    c.querySelectorAll('[data-remove-layer]').forEach(b => {
+      b.addEventListener('click', () => {
+        layersState.splice(Number(b.dataset.removeLayer), 1);
+        renderLayers();
+      });
+    });
+  }
+  renderLayers();
+  document.getElementById('addLayerBtn').addEventListener('click', () => {
+    if (layersState.length >= 6) { showToast('Max 6 layers'); return; }
+    layersState.push('');
+    renderLayers();
+  });
+
+  document.getElementById('saveStructure').addEventListener('click', () => {
+    q.structure = {
+      what: document.getElementById('sf-what').value.trim(),
+      why: document.getElementById('sf-why').value.trim(),
+      frequency: document.getElementById('sf-frequency').value.trim(),
+      damage: document.getElementById('sf-damage').value.trim(),
+      variable: document.getElementById('sf-variable').value.trim(),
+    };
+    q.layers = layersState.map(l => l.trim()).filter(l => l);
+    saveState();
+    closeModal();
+    showToast(isStructured(q) ? 'Structure saved' : 'Saved (still partial)');
+    render();
+  });
+}
+
+// ============ QUEUE ============
+function renderQueue(root) {
+  const sorted = [...state.queue].sort((a, b) => b.score - a.score);
+  root.innerHTML = `
+    <div class="section-head">
+      <div class="eyebrow">Strategic Queue</div>
+      <h1>Sorted by leverage.</h1>
+      <p class="sub">Only the top items deserve deep work. Structure an item before tackling it — vague problems create endless loops.</p>
+    </div>
+    <div class="divider"><span class="divider-text">${sorted.length === 0 ? 'Empty' : sorted.length + ' scored'}</span></div>
+    <div class="list">
+      ${sorted.length === 0 ? '<div class="empty">Promote captures from the Inbox to populate the queue.</div>' :
+        sorted.map((q, i) => {
+          const structured = isStructured(q);
+          const dom = q.domainId ? domainById(q.domainId) : null;
+          return `
+            <div class="queue-card">
+              <div class="queue-rank">
+                <span class="rank-num">${String(i + 1).padStart(2, '0')}</span>
+                <div class="score-badge">${q.score}</div>
+              </div>
+              <div class="queue-body">
+                <div class="queue-problem">${nl2br(q.problem)}</div>
+                ${q.why ? `<div class="queue-why">${nl2br(q.why)}</div>` : ''}
+                <div class="queue-tags">
+                  ${dom ? `<span class="tag tag-domain">${escapeHtml(dom.name)}</span>` : ''}
+                  <span class="tag">F${q.frequency}</span>
+                  <span class="tag">I${q.impact}</span>
+                  ${q.recurring ? '<span class="tag">recurring</span>' : ''}
+                  ${q.dataSolvable ? '<span class="tag">data-solvable</span>' : ''}
+                  ${structured
+                    ? `<span class="tag tag-structured">${icons.checkTiny} structured</span>`
+                    : '<span class="tag tag-unstructured">unstructured</span>'
+                  }
+                </div>
+              </div>
+              <div class="queue-actions">
+                <button class="icon-btn" data-structure="${q.id}" title="Structure">${icons.edit}</button>
+                <button class="icon-btn" data-remove-queue="${q.id}" title="Remove">${icons.trash}</button>
+              </div>
+            </div>
+          `;
+        }).join('')
+      }
+    </div>
+  `;
+  document.querySelectorAll('[data-structure]').forEach(b => {
+    b.addEventListener('click', () => openStructureSheet(Number(b.dataset.structure)));
+  });
+  document.querySelectorAll('[data-remove-queue]').forEach(b => {
+    b.addEventListener('click', () => {
+      const id = Number(b.dataset.removeQueue);
+      const item = state.queue.find(q => q.id === id);
+      if (!item) return;
+      confirmDialog({
+        title: 'Remove from Queue?',
+        message: `"${item.problem.length > 80 ? item.problem.slice(0, 80) + '…' : item.problem}"`,
+        okText: 'Remove',
+        onConfirm: () => {
+          state.queue = state.queue.filter(q => q.id !== id);
+          saveState();
+          render();
+        },
+      });
+    });
+  });
+}
+
+// ============ DEEP WORK ============
+function renderDeepWork(root) {
+  if (deepWorking) { renderDeepWorkSession(root); return; }
+
+  const sorted = [...state.queue].sort((a, b) => b.score - a.score);
+  const structured = sorted.filter(isStructured);
+  const unstructured = sorted.filter(q => !isStructured(q));
+  const recent = state.deepWork.slice(0, 5);
+
+  root.innerHTML = `
+    <div class="section-head">
+      <div class="eyebrow">Deep Work</div>
+      <h1>One problem. One output.</h1>
+      <p class="sub">Pick from the queue. Define, extract, produce. Every session ends with one executable next step.</p>
+    </div>
+
+    ${structured.length > 0 ? `
+      <div class="divider"><span class="divider-text">Ready (structured)</span></div>
+      <div class="list">
+        ${structured.map(q => dwPickCard(q, true)).join('')}
+      </div>
+    ` : `
+      <div class="dw-warn">
+        ${icons.info} No structured items yet. Structure a queue item first — it converts vague problems into specific, solvable ones.
+      </div>
+    `}
+
+    ${unstructured.length > 0 ? `
+      <div class="divider"><span class="divider-text">Needs structuring first</span></div>
+      <div class="list">
+        ${unstructured.map(q => dwPickCard(q, false)).join('')}
+      </div>
+    ` : ''}
+
+    ${recent.length > 0 ? `
+      <div class="divider"><span class="divider-text">Recent sessions</span></div>
+      <div class="list">
+        ${recent.map(d => `
+          <div class="history-card">
+            <div class="history-date">${formatDate(new Date(d.ts))} · ${timeAgo(d.ts)} ago</div>
+            <div style="font-size:14px;font-style:italic;margin-bottom:8px;">${escapeHtml(d.problemText)}</div>
+            <div class="history-row"><span class="history-label">Output</span>${nl2br(d.output || '—')}</div>
+            <div class="history-row"><span class="history-label">Next</span>${nl2br(d.nextAction)}</div>
+          </div>
+        `).join('')}
+      </div>
+    ` : ''}
+  `;
+
+  document.querySelectorAll('[data-start-dw]').forEach(b => {
+    b.addEventListener('click', () => {
+      const id = Number(b.dataset.startDw);
+      const q = state.queue.find(x => x.id === id);
+      if (!q) return;
+      if (!isStructured(q)) {
+        confirmDialog({
+          title: 'Structure first?',
+          message: 'This item hasn\'t been structured into a specific problem statement. Structuring it first makes deep work much more effective.',
+          okText: 'Structure It',
+          cancelText: 'Work Anyway',
+          danger: false,
+          onConfirm: () => openStructureSheet(id),
+        });
+        // If user picks "Work Anyway" (cancel), still proceed
+        const oldCancel = document.getElementById('confirmCancel');
+        if (oldCancel) {
+          oldCancel.addEventListener('click', () => {
+            beginDeepWork(q);
+          }, { once: true });
+        }
+        return;
+      }
+      beginDeepWork(q);
+    });
+  });
+}
+
+function dwPickCard(q, ready) {
+  return `
+    <button class="dw-pick-card ${ready ? 'active' : ''}" data-start-dw="${q.id}">
+      <div class="dw-pick-head">
+        <div class="dw-pick-problem">${nl2br(q.problem)}</div>
+        <div class="dw-pick-score">${q.score}</div>
+      </div>
+      ${ready ? '<div style="font-size:11px;color:var(--signal);font-family:var(--mono);text-transform:uppercase;letter-spacing:0.08em;">Ready · tap to start</div>'
+              : '<div style="font-size:11px;color:var(--ink-muted);font-family:var(--mono);text-transform:uppercase;letter-spacing:0.08em;">Tap to structure</div>'}
+    </button>
+  `;
+}
+
+function beginDeepWork(q) {
+  deepWorking = q;
+  // Pre-fill problem & objective from structure if available
+  const s = q.structure || {};
+  dwDraft = {
+    problem: s.what || q.problem || '',
+    objective: '',
+    variables: s.variable || '',
+    output: '',
+    nextAction: '',
+  };
+  render();
+}
+
+function renderDeepWorkSession(root) {
+  const q = deepWorking;
+  const canSave = dwDraft.nextAction.trim().length > 0;
+
+  root.innerHTML = `
+    <div class="section-head">
+      <div class="eyebrow">Deep Work Session</div>
+      <h1>One closed loop.</h1>
+      <p class="sub" style="font-style:italic;">"${escapeHtml(q.problem)}"</p>
+    </div>
+
+    <div class="dw-warn">
+      ${icons.info} <strong>Rule:</strong> if no new insight in 15-20 min, stop. Collect data or test an assumption instead. Don't spin.
+    </div>
+
+    ${dwStage('01', 'Define Problem', 'What exactly are you solving? Be specific.', 'problem', dwDraft.problem, 3)}
+    ${dwStage('02', 'Define Objective', 'What does success look like? One sentence.', 'objective', dwDraft.objective, 2)}
+    ${dwStage('03', 'Extract Variables', 'What factors affect this? List them.', 'variables', dwDraft.variables, 3)}
+    ${dwStage('04', 'Create One Output', 'Tracking sheet, log, framework, table, SOP draft, flowchart, hypothesis. The tangible artifact this session produces.', 'output', dwDraft.output, 5)}
+    ${dwStage('05', 'Define Next Action', 'One executable next step. Required to close the loop.', 'nextAction', dwDraft.nextAction, 2)}
+
+    <div style="display:flex;gap:8px;margin-top:24px;">
+      <button class="btn-secondary-full" id="abandonDw">Abandon</button>
+      <button class="btn-primary-full" id="closeDw" ${canSave ? '' : 'disabled'}>${icons.check}<span>Close Loop</span></button>
+    </div>
+    ${!canSave ? '<p class="sub" style="margin-top:10px;font-size:12px;text-align:center;">Next action required to close the session.</p>' : ''}
+  `;
+
+  document.querySelectorAll('[data-dw]').forEach(ta => {
+    ta.addEventListener('input', e => {
+      dwDraft[ta.dataset.dw] = e.target.value;
+      // Toggle the close button without full rerender
+      const closeBtn = document.getElementById('closeDw');
+      const helper = root.querySelector('p.sub[style*="text-align:center"]');
+      const ok = dwDraft.nextAction.trim().length > 0;
+      if (closeBtn) closeBtn.disabled = !ok;
+      if (helper) helper.style.display = ok ? 'none' : 'block';
+    });
+  });
+
+  document.getElementById('abandonDw').addEventListener('click', () => {
+    confirmDialog({
+      title: 'Abandon this session?',
+      message: 'Your draft will be discarded. The queue item stays.',
+      okText: 'Abandon',
+      onConfirm: () => {
+        deepWorking = null;
+        dwDraft = { problem: '', objective: '', variables: '', output: '', nextAction: '' };
+        render();
+      },
+    });
+  });
+
+  document.getElementById('closeDw').addEventListener('click', () => {
+    if (!dwDraft.nextAction.trim()) return;
+    state.deepWork.unshift({
+      id: Date.now(),
+      queueId: q.id,
+      problemText: q.problem,
+      problem: dwDraft.problem.trim(),
+      objective: dwDraft.objective.trim(),
+      variables: dwDraft.variables.trim(),
+      output: dwDraft.output.trim(),
+      nextAction: dwDraft.nextAction.trim(),
+      ts: Date.now(),
+      domainId: q.domainId || null,
+    });
+    state.deepWork = state.deepWork.slice(0, 50);
+    saveState();
+    deepWorking = null;
+    dwDraft = { problem: '', objective: '', variables: '', output: '', nextAction: '' };
+    showToast('Loop closed');
+    render();
+  });
+}
+
+function dwStage(num, label, sub, field, val, rows) {
+  return `
+    <div class="dw-stage">
+      <div class="dw-stage-head">
+        <span class="dw-stage-num">${num}</span>
+        <span class="dw-stage-label">${label}</span>
+      </div>
+      <div class="dw-stage-sub">${sub}</div>
+      <textarea class="dw-stage-textarea" data-dw="${field}" rows="${rows}" placeholder="…">${escapeHtml(val)}</textarea>
+    </div>
+  `;
+}
+
+// ============ DOMAINS ============
+const STATUS_OPTIONS = [
+  { id: 'manual', label: 'Manual' },
+  { id: 'drafted', label: 'SOP Drafted' },
+  { id: 'inuse', label: 'SOP In Use' },
+  { id: 'delegated', label: 'Delegated' },
+  { id: 'systemized', label: 'Systemized' },
+];
+const CADENCE_OPTIONS = [
+  { id: 'none', label: 'None' },
+  { id: 'weekly', label: 'Weekly' },
+  { id: 'monthly', label: 'Monthly' },
+  { id: 'quarterly', label: 'Quarterly' },
+];
+
+function domainById(id) { return state.domains.find(d => d.id === id); }
+function statusClass(s) { return 'ds-' + (s || 'manual'); }
+function statusLabel(s) {
+  const opt = STATUS_OPTIONS.find(x => x.id === s);
+  return opt ? opt.label : 'Manual';
+}
+
+function domainCounts(domainId) {
+  const week = 7 * 24 * 60 * 60 * 1000;
+  const now = Date.now();
+  const queueAll = state.queue.filter(q => q.domainId === domainId);
+  const queueWeek = queueAll.filter(q => now - q.ts < week);
+  const dwAll = state.deepWork.filter(d => d.domainId === domainId);
+  const dwWeek = dwAll.filter(d => now - d.ts < week);
+  return {
+    queueAll: queueAll.length,
+    queueWeek: queueWeek.length,
+    dwAll: dwAll.length,
+    dwWeek: dwWeek.length,
+  };
+}
+
+function renderDomains(root) {
+  root.innerHTML = `
+    <div class="section-head">
+      <div class="eyebrow">Domains</div>
+      <h1>What recurs.</h1>
+      <p class="sub">Categories of work that keep generating items. Decide once per domain: SOP, hire, delegate. Track which ate your week.</p>
+    </div>
+
+    <button class="domain-add-btn" id="addDomainBtn">${icons.plus}<span>Add Domain</span></button>
+
+    ${state.domains.length === 0 ? `
+      <div class="empty" style="padding:40px 16px;">
+        No domains yet. Add 8–12 recurring streams: production, retailer follow-ups, cash flow, hiring, customer complaints, dispatch, new designs, finance review…
+      </div>
+    ` : `
+      <div id="domainList">
+        ${state.domains.map((d, i) => domainCardHTML(d, i, state.domains.length)).join('')}
+      </div>
+    `}
+  `;
+
+  document.getElementById('addDomainBtn').addEventListener('click', () => openDomainSheet(null));
+
+  document.querySelectorAll('[data-domain-edit]').forEach(b => {
+    b.addEventListener('click', () => openDomainSheet(b.dataset.domainEdit));
+  });
+  document.querySelectorAll('[data-domain-up]').forEach(b => {
+    b.addEventListener('click', () => moveDomain(b.dataset.domainUp, -1));
+  });
+  document.querySelectorAll('[data-domain-down]').forEach(b => {
+    b.addEventListener('click', () => moveDomain(b.dataset.domainDown, 1));
+  });
+}
+
+function domainCardHTML(d, i, total) {
+  const counts = domainCounts(d.id);
+  const reviewedAgo = d.reviewedAt ? timeAgo(d.reviewedAt) + ' ago' : 'never';
+  return `
+    <div class="domain-card">
+      <div class="domain-order">
+        <button class="domain-order-btn" data-domain-up="${d.id}" ${i === 0 ? 'disabled' : ''} aria-label="Move up">${icons.chevronUp}</button>
+        <button class="domain-order-btn" data-domain-down="${d.id}" ${i === total - 1 ? 'disabled' : ''} aria-label="Move down">${icons.chevronDown}</button>
+      </div>
+      <div class="domain-body" data-domain-edit="${d.id}" style="cursor:pointer;">
+        <div class="domain-head">
+          <div class="domain-name">${escapeHtml(d.name)}</div>
+          <span class="domain-status-pill ${statusClass(d.status)}">${statusLabel(d.status)}</span>
+        </div>
+        <div class="domain-meta">
+          <span class="domain-meta-item">
+            <span>You-dep</span>
+            <span class="domain-meta-dots">
+              ${[1,2,3,4,5].map(n => `<span class="domain-dot ${n <= (d.youDep || 0) ? 'filled' : ''}"></span>`).join('')}
+            </span>
+          </span>
+          ${d.cadence && d.cadence !== 'none' ? `<span class="domain-meta-item">· Review ${d.cadence}</span>` : ''}
+          <span class="domain-meta-item">· Edited ${reviewedAgo}</span>
+        </div>
+        ${d.intervention ? `
+          <div class="domain-intervention">
+            <span class="domain-int-label">Next</span>${escapeHtml(d.intervention)}
+          </div>
+        ` : `
+          <div class="domain-intervention empty">No next intervention defined</div>
+        `}
+        <div class="domain-counts">
+          <span><strong>${counts.queueWeek}</strong> queue this week</span>
+          <span><strong>${counts.queueAll}</strong> queue total</span>
+          <span><strong>${counts.dwAll}</strong> sessions</span>
+        </div>
+      </div>
+    </div>
+  `;
+}
+
+function moveDomain(id, dir) {
+  const i = state.domains.findIndex(d => d.id === id);
+  if (i === -1) return;
+  const j = i + dir;
+  if (j < 0 || j >= state.domains.length) return;
+  const tmp = state.domains[i];
+  state.domains[i] = state.domains[j];
+  state.domains[j] = tmp;
+  saveState();
+  render();
+}
+
+// ============ DOMAIN EDIT SHEET ============
+let editingDomain = null;
+let domainDraft = null;
+
+function openDomainSheet(domainId) {
+  if (domainId) {
+    const d = domainById(domainId);
+    if (!d) return;
+    editingDomain = d;
+    domainDraft = {
+      name: d.name || '',
+      youDep: d.youDep || 3,
+      status: d.status || 'manual',
+      intervention: d.intervention || '',
+      sop: d.sop || '',
+      cadence: d.cadence || 'none',
+    };
+  } else {
+    editingDomain = null;
+    domainDraft = {
+      name: '',
+      youDep: 3,
+      status: 'manual',
+      intervention: '',
+      sop: '',
+      cadence: 'none',
+    };
+  }
+  renderDomainSheet();
+}
+
+function renderDomainSheet() {
+  const isNew = !editingDomain;
+  document.getElementById('modal-root').innerHTML = `
+    <div class="modal-overlay" id="modalOverlay">
+      <div class="modal" id="modalBody">
+        <div class="modal-head">
+          <div class="modal-eyebrow">${isNew ? 'New Domain' : 'Edit Domain'}</div>
+          <button class="icon-btn" id="closeModal">${icons.xBig}</button>
+        </div>
+
+        <label class="label">Domain name<span class="label-sub">e.g. Production Scheduling, Retailer Follow-ups, Cash Flow Review</span></label>
+        <input class="field-input" id="dom-name" value="${escapeHtml(domainDraft.name)}" placeholder="Name this stream of work" />
+
+        <div class="scale-row" style="margin-top:8px;">
+          <div class="scale-head">
+            <span class="scale-label">You-dependency</span>
+            <span class="scale-val" id="domYouDepVal">${domainDraft.youDep}</span>
+          </div>
+          <div class="scale-sub">How much does this currently require you personally?</div>
+          <div class="scale-btns" id="domYouDepPips"></div>
+          <div class="scale-bounds"><span>None</span><span>Total</span></div>
+        </div>
+
+        <div style="margin-top:24px;">
+          <label class="label">Status</label>
+          <div class="status-grid" id="domStatusGrid">
+            ${STATUS_OPTIONS.map(s => `
+              <button class="status-opt ${domainDraft.status === s.id ? 'active' : ''}" data-status="${s.id}">${s.label}</button>
+            `).join('')}
+          </div>
+        </div>
+
+        <label class="label">Next intervention<span class="label-sub">The single next thing that moves this domain forward. e.g. "Write daily production check-in SOP" or "Hire collections person"</span></label>
+        <textarea class="field-textarea" id="dom-intervention" rows="2" placeholder="One concrete next step">${escapeHtml(domainDraft.intervention)}</textarea>
+
+        <label class="label">Review cadence<span class="label-sub">How often you review this domain's status.</span></label>
+        <div class="cadence-row" id="domCadenceRow">
+          ${CADENCE_OPTIONS.map(c => `
+            <button class="cadence-opt ${domainDraft.cadence === c.id ? 'active' : ''}" data-cadence="${c.id}">${c.label}</button>
+          `).join('')}
+        </div>
+
+        <label class="label">SOP / Notes<span class="label-sub">The decision document for this domain. Markdown-style. What the SOP is, where it lives, current state, open questions.</span></label>
+        <textarea class="field-textarea" id="dom-sop" rows="8" placeholder="# Production Check-in SOP&#10;&#10;## Who&#10;## When&#10;## Steps&#10;## Escalation">${escapeHtml(domainDraft.sop)}</textarea>
+
+        <div style="display:flex;gap:8px;margin-top:8px;">
+          ${!isNew ? '<button class="btn-secondary-full" id="deleteDomainBtn" style="color:#b91c1c;border-color:#fbd5cf;">Delete</button>' : ''}
+          <button class="btn-primary-full" id="saveDomainBtn">${icons.check}<span>${isNew ? 'Create' : 'Save'}</span></button>
+        </div>
+      </div>
+    </div>
+  `;
+
+  document.getElementById('modalOverlay').addEventListener('click', closeModal);
+  document.getElementById('modalBody').addEventListener('click', e => e.stopPropagation());
+  document.getElementById('closeModal').addEventListener('click', closeModal);
+
+  document.getElementById('dom-name').addEventListener('input', e => { domainDraft.name = e.target.value; });
+  document.getElementById('dom-intervention').addEventListener('input', e => { domainDraft.intervention = e.target.value; });
+  document.getElementById('dom-sop').addEventListener('input', e => { domainDraft.sop = e.target.value; });
+
+  // You-dep pips
+  function renderYouDepPips() {
+    const c = document.getElementById('domYouDepPips');
+    c.innerHTML = [1,2,3,4,5].map(n =>
+      `<button class="scale-pip ${n <= domainDraft.youDep ? 'active' : ''}" data-yd="${n}"></button>`
+    ).join('');
+    c.querySelectorAll('[data-yd]').forEach(b => {
+      b.addEventListener('click', () => {
+        domainDraft.youDep = Number(b.dataset.yd);
+        renderYouDepPips();
+        document.getElementById('domYouDepVal').textContent = domainDraft.youDep;
+      });
+    });
+  }
+  renderYouDepPips();
+
+  // Status grid
+  document.querySelectorAll('[data-status]').forEach(b => {
+    b.addEventListener('click', () => {
+      domainDraft.status = b.dataset.status;
+      document.querySelectorAll('[data-status]').forEach(x => x.classList.remove('active'));
+      b.classList.add('active');
+    });
+  });
+
+  // Cadence
+  document.querySelectorAll('[data-cadence]').forEach(b => {
+    b.addEventListener('click', () => {
+      domainDraft.cadence = b.dataset.cadence;
+      document.querySelectorAll('[data-cadence]').forEach(x => x.classList.remove('active'));
+      b.classList.add('active');
+    });
+  });
+
+  document.getElementById('saveDomainBtn').addEventListener('click', () => {
+    if (!domainDraft.name.trim()) { showToast('Name is required'); return; }
+    if (editingDomain) {
+      Object.assign(editingDomain, {
+        name: domainDraft.name.trim(),
+        youDep: domainDraft.youDep,
+        status: domainDraft.status,
+        intervention: domainDraft.intervention.trim(),
+        sop: domainDraft.sop,
+        cadence: domainDraft.cadence,
+        reviewedAt: Date.now(),
+      });
+    } else {
+      state.domains.push({
+        id: 'd_' + Date.now(),
+        name: domainDraft.name.trim(),
+        youDep: domainDraft.youDep,
+        status: domainDraft.status,
+        intervention: domainDraft.intervention.trim(),
+        sop: domainDraft.sop,
+        cadence: domainDraft.cadence,
+        ts: Date.now(),
+        reviewedAt: Date.now(),
+      });
+    }
+    saveState();
+    closeModal();
+    showToast(editingDomain ? 'Saved' : 'Created');
+    editingDomain = null;
+    domainDraft = null;
+    render();
+  });
+
+  if (!isNew) {
+    document.getElementById('deleteDomainBtn').addEventListener('click', () => {
+      confirmDialog({
+        title: 'Delete this domain?',
+        message: `"${editingDomain.name}". Items tagged with this domain will become untagged. The domain itself is removed permanently.`,
+        okText: 'Delete',
+        onConfirm: () => {
+          // Untag related items
+          state.queue = state.queue.map(q => q.domainId === editingDomain.id ? { ...q, domainId: null } : q);
+          state.deepWork = state.deepWork.map(d => d.domainId === editingDomain.id ? { ...d, domainId: null } : d);
+          state.domains = state.domains.filter(d => d.id !== editingDomain.id);
+          saveState();
+          closeModal();
+          editingDomain = null;
+          domainDraft = null;
+          showToast('Domain deleted');
+          render();
+        },
+      });
+    });
+  }
+}
+
+// ============ TODAY ============
+function renderToday(root) {
+  const filled = state.today.items.filter(x => x.trim()).length;
+  const sortedQ = [...state.queue].sort((a, b) => b.score - a.score).slice(0, 5);
+  root.innerHTML = `
+    <div class="section-head">
+      <div class="eyebrow">Today</div>
+      <h1>Three. Not fifteen.</h1>
+      <p class="sub">Defined the night before. Closed loops only. If it doesn't fit in three, it isn't a priority.</p>
+    </div>
+    <div class="today-count">
+      <span class="today-count-num">${filled}</span>
+      <span class="today-count-slash">/</span>
+      <span class="today-count-total">3</span>
+    </div>
+    <div class="today-list">
+      ${state.today.items.map((item, i) => `
+        <div class="today-item">
+          <div class="today-marker">${['I','II','III'][i]}</div>
+          <input class="today-input" data-today-i="${i}" value="${escapeHtml(item)}" placeholder="Defined deliverable…" />
+        </div>
+      `).join('')}
+    </div>
+    ${sortedQ.length > 0 ? `
+      <div class="divider"><span class="divider-text">Pull from Queue</span></div>
+      <div class="list">
+        ${sortedQ.map(q => `
+          <button class="pull-btn" data-pull="${escapeHtml(q.problem)}">
+            <div class="pull-score">${q.score}</div>
+            <div class="pull-text">${nl2br(q.problem)}</div>
+            ${icons.chevronRight}
+          </button>
+        `).join('')}
+      </div>
+    ` : ''}
+  `;
+  document.querySelectorAll('[data-today-i]').forEach(inp => {
+    inp.addEventListener('input', e => {
+      const i = Number(inp.dataset.todayI);
+      state.today.items[i] = e.target.value;
+      saveState();
+    });
+  });
+  document.querySelectorAll('[data-pull]').forEach(b => {
+    b.addEventListener('click', () => {
+      const problem = b.dataset.pull;
+      const empty = state.today.items.findIndex(x => !x.trim());
+      if (empty === -1) { showToast('All three slots filled'); return; }
+      state.today.items[empty] = problem;
+      saveState();
+      render();
+    });
+  });
+}
+
+// ============ DUMP ============
+function renderDump(root) {
+  root.innerHTML = `
+    <div class="section-head">
+      <div class="eyebrow">Brain Dump</div>
+      <h1>Empty the head.</h1>
+      <p class="sub">Unresolved tasks, concerns, ideas, pending decisions. Convince the brain nothing will be forgotten.</p>
+    </div>
+    <textarea class="dump-area" id="dumpArea" rows="18" placeholder="— pending decisions
+— concerns weighing on the mind
+— ideas to revisit
+— things half-thought-through…">${escapeHtml(state.brainDump)}</textarea>
+    <div class="dump-count" id="dumpCount">${state.brainDump.length} characters · saves automatically</div>
+  `;
+  const area = document.getElementById('dumpArea');
+  const count = document.getElementById('dumpCount');
+  area.addEventListener('input', e => {
+    state.brainDump = e.target.value;
+    saveState();
+    count.textContent = state.brainDump.length + ' characters · saves automatically';
+  });
+}
+
+// ============ SHUTDOWN ============
+function renderShutdown(root) {
+  const sd = state.shutdown;
+  const ready = sd.completed.trim() || sd.moved.trim() || sd.waiting.trim();
+  root.innerHTML = `
+    <div class="section-head">
+      <div class="eyebrow">Shutdown Ritual</div>
+      <h1>Close the day.</h1>
+      <p class="sub">Recognize what moved. Tell the brain it's safe to stop processing.</p>
+    </div>
+    ${sdField('01', 'Completed', 'What actually got done.', 'completed', sd.completed)}
+    ${sdField('02', 'Moved forward', 'What advanced, even partially.', 'moved', sd.moved)}
+    ${sdField('03', 'Can wait', 'What you are consciously deferring.', 'waiting', sd.waiting)}
+    <button class="btn-primary-full" id="closeDayBtn" ${ready ? '' : 'disabled'} style="margin-top: 24px;">
+      ${icons.moon}<span>Close the Day</span>
+    </button>
+    ${state.history.length > 0 ? `
+      <div class="divider"><span class="divider-text">Past Closes</span></div>
+      <div class="list">
+        ${state.history.slice(0, 5).map(h => `
+          <div class="history-card">
+            <div class="history-date">${formatDate(new Date(h.ts))}</div>
+            ${h.completed ? `<div class="history-row"><span class="history-label">Done</span>${nl2br(h.completed)}</div>` : ''}
+            ${h.moved ? `<div class="history-row"><span class="history-label">Moved</span>${nl2br(h.moved)}</div>` : ''}
+            ${h.waiting ? `<div class="history-row"><span class="history-label">Wait</span>${nl2br(h.waiting)}</div>` : ''}
+          </div>
+        `).join('')}
+      </div>
+    ` : ''}
+  `;
+  document.querySelectorAll('[data-sd]').forEach(ta => {
+    ta.addEventListener('input', e => {
+      state.shutdown[ta.dataset.sd] = e.target.value;
+      saveState();
+      const btn = document.getElementById('closeDayBtn');
+      const s = state.shutdown;
+      btn.disabled = !(s.completed.trim() || s.moved.trim() || s.waiting.trim());
+    });
+  });
+  document.getElementById('closeDayBtn').addEventListener('click', () => {
+    confirmDialog({
+      title: 'Close the day?',
+      message: 'This archives the entry and clears today\'s priorities and brain dump for a fresh start tomorrow. Past closes are saved in history.',
+      okText: 'Close Day',
+      cancelText: 'Not yet',
+      danger: false,
+      onConfirm: () => {
+        const entry = {
+          date: todayKey(),
+          ts: Date.now(),
+          completed: state.shutdown.completed,
+          moved: state.shutdown.moved,
+          waiting: state.shutdown.waiting,
+          priorities: state.today.items.filter(x => x.trim()),
+          dumpSnapshot: state.brainDump,
+        };
+        state.history.unshift(entry);
+        state.history = state.history.slice(0, 30);
+        state.shutdown = { date: todayKey(), completed: '', moved: '', waiting: '' };
+        state.brainDump = '';
+        state.today = { date: todayKey(), items: ['', '', ''] };
+        saveState();
+        showToast('Day closed. Sleep well.');
+        render();
+      },
+    });
+  });
+}
+function sdField(num, label, sub, field, val) {
+  return `
+    <div class="sd-field">
+      <div class="sd-head">
+        <span class="sd-num">${num}</span>
+        <div>
+          <div class="sd-label">${label}</div>
+          <div class="sd-sub">${sub}</div>
+        </div>
+      </div>
+      <textarea class="sd-textarea" data-sd="${field}" rows="3" placeholder="…">${escapeHtml(val)}</textarea>
+    </div>
+  `;
+}
+
+// ============ SETTINGS ============
+function renderSettings(root) {
+  const noiseCount = state.captures.filter(c => c.kind === 'noise').length;
+  const structuredCount = state.queue.filter(isStructured).length;
+
+  root.innerHTML = `
+    <div class="section-head">
+      <div class="eyebrow">Data</div>
+      <h1>Your second brain.</h1>
+      <p class="sub">Everything lives on this device. Back up regularly — clearing browser data will erase it.</p>
+    </div>
+    <div class="stats-row">
+      <div class="stat-box"><div class="stat-num">${state.captures.filter(c => c.kind !== 'noise').length}</div><div class="stat-label">Signal</div></div>
+      <div class="stat-box"><div class="stat-num">${noiseCount}</div><div class="stat-label">Noise</div></div>
+      <div class="stat-box"><div class="stat-num">${state.queue.length}</div><div class="stat-label">In Queue</div></div>
+      <div class="stat-box"><div class="stat-num">${structuredCount}</div><div class="stat-label">Structured</div></div>
+      <div class="stat-box"><div class="stat-num">${state.domains.length}</div><div class="stat-label">Domains</div></div>
+      <div class="stat-box"><div class="stat-num">${state.deepWork.length}</div><div class="stat-label">Sessions</div></div>
+      <div class="stat-box"><div class="stat-num">${state.history.length}</div><div class="stat-label">Days Closed</div></div>
+    </div>
+    <div class="settings-section">
+      <div class="settings-section-title">Backup</div>
+      <button class="setting-btn" id="exportBtn">
+        <div class="setting-icon">${icons.download}</div>
+        <div class="setting-content">
+          <div class="setting-title">Export to file</div>
+          <div class="setting-desc">Download everything as JSON. Save to Drive or email to yourself.</div>
+        </div>
+      </button>
+      <button class="setting-btn" id="importBtn">
+        <div class="setting-icon">${icons.upload}</div>
+        <div class="setting-content">
+          <div class="setting-title">Import from file</div>
+          <div class="setting-desc">Restore a previous backup. Replaces current data.</div>
+        </div>
+      </button>
+      <input type="file" id="importFile" accept="application/json,.json" style="display:none" />
+    </div>
+    <div class="settings-section">
+      <div class="settings-section-title">Back to App</div>
+      <button class="setting-btn" id="backToCapture">
+        <div class="setting-icon">${icons.inbox}</div>
+        <div class="setting-content">
+          <div class="setting-title">Return to Capture</div>
+          <div class="setting-desc">Back to the main view.</div>
+        </div>
+      </button>
+    </div>
+    <div class="settings-section">
+      <div class="settings-section-title">Danger Zone</div>
+      <button class="setting-btn setting-danger" id="clearBtn">
+        <div class="setting-icon">${icons.trashBig}</div>
+        <div class="setting-content">
+          <div class="setting-title">Erase everything</div>
+          <div class="setting-desc">Permanently delete all captures, queue, sessions, history, and notes.</div>
+        </div>
+      </button>
+    </div>
+  `;
+  document.getElementById('exportBtn').addEventListener('click', exportData);
+  document.getElementById('importBtn').addEventListener('click', () => document.getElementById('importFile').click());
+  document.getElementById('importFile').addEventListener('change', importData);
+  document.getElementById('backToCapture').addEventListener('click', () => { currentTab = 'capture'; render(); });
+  document.getElementById('clearBtn').addEventListener('click', () => {
+    confirmDialog({
+      title: 'Erase everything?',
+      message: 'This will permanently delete all captures, queue items, deep work sessions, history, and notes. Export a backup first if you might want any of it back.',
+      okText: 'Erase All',
+      onConfirm: () => {
+        confirmDialog({
+          title: 'Really sure?',
+          message: 'This cannot be undone. Last chance to cancel.',
+          okText: 'Yes, erase',
+          onConfirm: () => {
+            state = JSON.parse(JSON.stringify(defaultState));
+            rolloverIfNeeded();
+            saveState();
+            showToast('Everything cleared');
+            currentTab = 'capture';
+            render();
+          },
+        });
+      },
+    });
+  });
+}
+
+function exportData() {
+  const data = JSON.stringify({ version: 2, exportedAt: new Date().toISOString(), data: state }, null, 2);
+  const blob = new Blob([data], { type: 'application/json' });
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement('a');
+  a.href = url;
+  a.download = `ledger-backup-${todayKey()}.json`;
+  document.body.appendChild(a);
+  a.click();
+  document.body.removeChild(a);
+  URL.revokeObjectURL(url);
+  showToast('Backup downloaded');
+}
+function importData(e) {
+  const file = e.target.files[0];
+  if (!file) return;
+  confirmDialog({
+    title: 'Replace all data?',
+    message: 'Importing will overwrite everything currently saved.',
+    okText: 'Replace',
+    onConfirm: () => {
+      const reader = new FileReader();
+      reader.onload = (ev) => {
+        try {
+          const parsed = JSON.parse(ev.target.result);
+          const incoming = parsed.data || parsed;
+          state = { ...JSON.parse(JSON.stringify(defaultState)), ...incoming };
+          // Migrate: ensure captures have 'kind'
+          state.captures = state.captures.map(c => ({ kind: 'signal', ...c }));
+          // Migrate: ensure queue items have structure, layers, domainId fields
+          state.queue = state.queue.map(q => ({ structure: null, layers: [], domainId: null, ...q }));
+          state.deepWork = (state.deepWork || []).map(d => ({ domainId: null, ...d }));
+          state.domains = state.domains || [];
+          rolloverIfNeeded();
+          saveState();
+          showToast('Data restored');
+          render();
+        } catch (err) {
+          showToast('Could not read backup file');
+        }
+        e.target.value = '';
+      };
+      reader.readAsText(file);
+    },
+  });
+  setTimeout(() => { if (document.getElementById('confirm-root').innerHTML === '') e.target.value = ''; }, 100);
+}
+
+// ============ TOAST ============
+function showToast(msg) {
+  const root = document.getElementById('toast-root');
+  root.innerHTML = `<div class="toast">${escapeHtml(msg)}</div>`;
+  setTimeout(() => { if (root.firstChild) root.innerHTML = ''; }, 2200);
+}
+
+// ============ CONFIRM ============
+function confirmDialog({ title, message, okText = 'Delete', cancelText = 'Cancel', danger = true, onConfirm }) {
+  const root = document.getElementById('confirm-root');
+  root.innerHTML = `
+    <div class="confirm-overlay" id="confirmOverlay">
+      <div class="confirm-box" id="confirmBox">
+        <div class="confirm-title">${escapeHtml(title)}</div>
+        <div class="confirm-message">${escapeHtml(message)}</div>
+        <div class="confirm-actions">
+          <button class="confirm-cancel" id="confirmCancel">${escapeHtml(cancelText)}</button>
+          <button class="confirm-ok ${danger ? 'danger' : ''}" id="confirmOk">${escapeHtml(okText)}</button>
+        </div>
+      </div>
+    </div>
+  `;
+  const close = () => { root.innerHTML = ''; };
+  document.getElementById('confirmOverlay').addEventListener('click', close);
+  document.getElementById('confirmBox').addEventListener('click', e => e.stopPropagation());
+  document.getElementById('confirmCancel').addEventListener('click', close);
+  document.getElementById('confirmOk').addEventListener('click', () => { close(); onConfirm(); });
+}
+
+// ============ INSTALL ============
+let deferredInstallPrompt = null;
+window.addEventListener('beforeinstallprompt', (e) => {
+  e.preventDefault();
+  deferredInstallPrompt = e;
+  if (!localStorage.getItem('ledger_install_dismissed')) showInstallBanner();
+});
+function showInstallBanner() {
+  document.getElementById('install-root').innerHTML = `
+    <div class="install-banner">
+      <div class="install-banner-text">Install Ledger as an app for faster access and offline use.</div>
+      <button class="install-banner-btn" id="installAccept">Install</button>
+      <button class="install-banner-close" id="installDismiss">${icons.xBig}</button>
+    </div>
+  `;
+  document.getElementById('installAccept').addEventListener('click', async () => {
+    if (deferredInstallPrompt) {
+      deferredInstallPrompt.prompt();
+      await deferredInstallPrompt.userChoice;
+      deferredInstallPrompt = null;
+    }
+    document.getElementById('install-root').innerHTML = '';
+  });
+  document.getElementById('installDismiss').addEventListener('click', () => {
+    localStorage.setItem('ledger_install_dismissed', '1');
+    document.getElementById('install-root').innerHTML = '';
+  });
+}
+
+// ============ SERVICE WORKER ============
+if ('serviceWorker' in navigator) {
+  const swCode = `
+    const CACHE = 'ledger-v2';
+    self.addEventListener('install', e => { self.skipWaiting(); });
+    self.addEventListener('activate', e => { e.waitUntil(self.clients.claim()); });
+    self.addEventListener('fetch', e => {
+      if (e.request.method !== 'GET') return;
+      e.respondWith(
+        caches.open(CACHE).then(cache =>
+          cache.match(e.request).then(cached => {
+            const fetchPromise = fetch(e.request).then(resp => {
+              if (resp && resp.status === 200) cache.put(e.request, resp.clone());
+              return resp;
+            }).catch(() => cached);
+            return cached || fetchPromise;
+          })
+        )
+      );
+    });
+  `;
+  const blob = new Blob([swCode], { type: 'application/javascript' });
+  const swUrl = URL.createObjectURL(blob);
+  navigator.serviceWorker.register(swUrl).catch(() => {});
+}
+
+// Migrate legacy captures (pre-kind field)
+state.captures = state.captures.map(c => ({ kind: c.kind || 'signal', ...c }));
+state.queue = state.queue.map(q => ({ structure: q.structure || null, layers: q.layers || [], domainId: q.domainId || null, ...q }));
+state.deepWork = (state.deepWork || []).map(d => ({ domainId: d.domainId || null, ...d }));
+state.domains = state.domains || [];
+saveState();
+
+// Header menu wiring
+document.getElementById('menuBtn').addEventListener('click', (e) => {
+  e.stopPropagation();
+  toggleHeaderMenu();
+});
+
+// ============ BOOT ============
+render();
+</script>
+</body>
+</html>
