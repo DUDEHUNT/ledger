@@ -1,0 +1,223 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>Ledger Rescue</title>
+<style>
+  * { box-sizing: border-box; margin: 0; padding: 0; -webkit-tap-highlight-color: transparent; }
+  body {
+    font-family: Georgia, serif; background: #f6f1e8; color: #1a1612;
+    padding: 24px 20px 60px; line-height: 1.55;
+  }
+  h1 { font-size: 24px; font-style: italic; font-weight: 500; margin-bottom: 6px; }
+  .eyebrow {
+    font-size: 11px; text-transform: uppercase; letter-spacing: 0.18em;
+    color: #9a3412; font-weight: 600; margin-bottom: 10px;
+    font-family: ui-monospace, monospace;
+  }
+  .sub { font-size: 14px; color: #5d544a; margin-bottom: 24px; }
+  .card {
+    background: #fbf7ef; border: 1px solid #e6dccc;
+    border-radius: 4px; padding: 16px; margin-bottom: 12px;
+  }
+  .card h2 { font-size: 15px; font-style: italic; font-weight: 500; margin-bottom: 8px; }
+  .card .desc { font-size: 13px; color: #5d544a; margin-bottom: 12px; }
+  button {
+    width: 100%; padding: 14px; font-family: ui-monospace, monospace;
+    font-size: 13px; text-transform: uppercase; letter-spacing: 0.06em;
+    border-radius: 2px; cursor: pointer; border: 1px solid #e6dccc;
+    background: transparent; color: #1a1612; font-weight: 500;
+  }
+  button.primary { background: #1a1612; color: #f6f1e8; border-color: #1a1612; }
+  button.danger { background: #991b1b; color: #f6f1e8; border-color: #991b1b; }
+  pre {
+    background: #efe6d6; padding: 10px; border-radius: 3px;
+    font-size: 11px; line-height: 1.5; overflow-x: auto; margin-top: 10px;
+    font-family: ui-monospace, monospace; max-height: 200px; overflow-y: auto;
+  }
+  .stat { font-size: 13px; padding: 6px 0; border-bottom: 1px solid #efe6d6; }
+  .stat:last-child { border: none; }
+  .stat strong { font-family: ui-monospace, monospace; color: #9a3412; }
+  .toast {
+    position: fixed; bottom: 30px; left: 50%; transform: translateX(-50%);
+    background: #1a1612; color: #f6f1e8; padding: 12px 18px; border-radius: 4px;
+    font-size: 13px; font-family: ui-monospace, monospace;
+  }
+  .hidden { display: none; }
+  .ok { color: #4a6741; }
+  .bad { color: #991b1b; }
+</style>
+</head>
+<body>
+
+<div class="eyebrow">Ledger · Rescue</div>
+<h1>Recover your data.</h1>
+<p class="sub">This page reads your stored Ledger data directly. Download a backup before doing anything else.</p>
+
+<div class="card">
+  <h2>Step 1 · Inspect what's stored</h2>
+  <div class="desc">Check that your data is still there.</div>
+  <div id="inspect"></div>
+</div>
+
+<div class="card">
+  <h2>Step 2 · Download backup</h2>
+  <div class="desc">Save a copy to your phone before any other action. This is critical.</div>
+  <button class="primary" id="downloadBtn">Download Backup JSON</button>
+</div>
+
+<div class="card">
+  <h2>Step 3 · Repair (try this first)</h2>
+  <div class="desc">Attempts to clean up corrupt entries (null items, broken arrays) while keeping all valid data. Safe to try.</div>
+  <button id="repairBtn">Repair Data In Place</button>
+</div>
+
+<div class="card">
+  <h2>Step 4 · Hard reset (last resort)</h2>
+  <div class="desc">Wipes Ledger data from this device. Only do this AFTER downloading the backup above. You can re-import the backup into the main app later.</div>
+  <button class="danger" id="wipeBtn">Wipe All Ledger Data</button>
+</div>
+
+<div class="card">
+  <h2>Step 5 · Return to app</h2>
+  <div class="desc">After repair or reset, go back to the main app.</div>
+  <button id="returnBtn">Open Ledger</button>
+</div>
+
+<div id="toast-root"></div>
+
+<script>
+const KEY = 'ledger_v1';
+
+function $(id) { return document.getElementById(id); }
+function toast(msg) {
+  const r = $('toast-root');
+  r.innerHTML = '<div class="toast">' + msg + '</div>';
+  setTimeout(() => { r.innerHTML = ''; }, 2500);
+}
+
+function loadRaw() {
+  try { return localStorage.getItem(KEY); }
+  catch (e) { return null; }
+}
+function loadParsed() {
+  const raw = loadRaw();
+  if (!raw) return null;
+  try { return JSON.parse(raw); }
+  catch (e) { return { __parseError: true, raw: raw.slice(0, 500) }; }
+}
+
+function inspect() {
+  const el = $('inspect');
+  const raw = loadRaw();
+  if (!raw) {
+    el.innerHTML = '<div class="stat bad">No Ledger data found in this browser.</div>';
+    return;
+  }
+  const sizeKb = (raw.length / 1024).toFixed(1);
+  const parsed = loadParsed();
+  if (!parsed || parsed.__parseError) {
+    el.innerHTML = '<div class="stat bad">Data exists (' + sizeKb + ' KB) but is corrupt JSON. Download will still work — saves the raw text.</div>';
+    return;
+  }
+  const counts = {
+    captures: Array.isArray(parsed.captures) ? parsed.captures.length : 'BROKEN',
+    queue: Array.isArray(parsed.queue) ? parsed.queue.length : 'BROKEN',
+    domains: Array.isArray(parsed.domains) ? parsed.domains.length : (parsed.domains === undefined ? 0 : 'BROKEN'),
+    deepWork: Array.isArray(parsed.deepWork) ? parsed.deepWork.length : (parsed.deepWork === undefined ? 0 : 'BROKEN'),
+    history: Array.isArray(parsed.history) ? parsed.history.length : 0,
+    rewards: Array.isArray(parsed.rewards) ? parsed.rewards.length : 0,
+    milestones: Array.isArray(parsed.milestones) ? parsed.milestones.length : 0,
+  };
+  let nullEntries = 0;
+  ['captures','queue','domains','deepWork','history'].forEach(k => {
+    if (Array.isArray(parsed[k])) nullEntries += parsed[k].filter(x => x == null).length;
+  });
+  let html = '<div class="stat">Size: <strong>' + sizeKb + ' KB</strong></div>';
+  Object.entries(counts).forEach(([k,v]) => {
+    const cls = v === 'BROKEN' ? 'bad' : 'ok';
+    html += '<div class="stat ' + cls + '">' + k + ': <strong>' + v + '</strong></div>';
+  });
+  if (nullEntries > 0) {
+    html += '<div class="stat bad">Null/corrupt entries detected: <strong>' + nullEntries + '</strong> — repair will fix these.</div>';
+  }
+  el.innerHTML = html;
+}
+
+$('downloadBtn').addEventListener('click', () => {
+  const raw = loadRaw();
+  if (!raw) { toast('Nothing to back up'); return; }
+  let pretty = raw;
+  try { pretty = JSON.stringify(JSON.parse(raw), null, 2); } catch {}
+  const blob = new Blob([pretty], { type: 'application/json' });
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement('a');
+  const stamp = new Date().toISOString().slice(0,10);
+  a.href = url;
+  a.download = 'ledger-rescue-' + stamp + '.json';
+  document.body.appendChild(a);
+  a.click();
+  document.body.removeChild(a);
+  URL.revokeObjectURL(url);
+  toast('Downloaded');
+});
+
+$('repairBtn').addEventListener('click', () => {
+  const parsed = loadParsed();
+  if (!parsed) { toast('Nothing to repair'); return; }
+  if (parsed.__parseError) { toast('Cannot repair — JSON is malformed. Use Wipe + re-import backup.'); return; }
+  if (!confirm('Repair will: remove null entries from arrays, ensure all expected fields exist, and reset corrupt structures. Your data is preserved. Continue?')) return;
+
+  const repaired = {
+    captures: (Array.isArray(parsed.captures) ? parsed.captures : []).filter(x => x && typeof x === 'object'),
+    queue: (Array.isArray(parsed.queue) ? parsed.queue : []).filter(x => x && typeof x === 'object'),
+    domains: (Array.isArray(parsed.domains) ? parsed.domains : []).filter(x => x && typeof x === 'object'),
+    today: parsed.today && typeof parsed.today === 'object' ? parsed.today : { date: '', items: [] },
+    brainDump: typeof parsed.brainDump === 'string' ? parsed.brainDump : '',
+    shutdown: parsed.shutdown && typeof parsed.shutdown === 'object' ? parsed.shutdown : { date: '', completed: '', moved: '', waiting: '' },
+    history: (Array.isArray(parsed.history) ? parsed.history : []).filter(x => x && typeof x === 'object'),
+    deepWork: (Array.isArray(parsed.deepWork) ? parsed.deepWork : []).filter(x => x && typeof x === 'object'),
+    rewards: (Array.isArray(parsed.rewards) ? parsed.rewards : []).filter(x => x && typeof x === 'object'),
+    milestones: (Array.isArray(parsed.milestones) ? parsed.milestones : []).filter(x => x && typeof x === 'object'),
+    cloudSync: parsed.cloudSync && typeof parsed.cloudSync === 'object' ? parsed.cloudSync : { enabled: false, projectId: '', apiKey: '', userId: '', lastSync: 0 },
+  };
+  // Normalize today.items
+  if (Array.isArray(repaired.today.items)) {
+    repaired.today.items = repaired.today.items.map(x => {
+      if (typeof x === 'string') return { text: x, done: false };
+      if (x && typeof x === 'object') return { text: x.text || '', done: !!x.done };
+      return { text: '', done: false };
+    });
+    while (repaired.today.items.length < 3) repaired.today.items.push({ text: '', done: false });
+  } else {
+    repaired.today.items = [{text:'',done:false},{text:'',done:false},{text:'',done:false}];
+  }
+  try {
+    localStorage.setItem(KEY, JSON.stringify(repaired));
+    toast('Repaired. Reopen the app.');
+    setTimeout(inspect, 100);
+  } catch (e) {
+    toast('Save failed: ' + e.message);
+  }
+});
+
+$('wipeBtn').addEventListener('click', () => {
+  if (!confirm('This will permanently DELETE all Ledger data on this device. Did you download the backup first?')) return;
+  if (!confirm('Last chance. Wipe everything?')) return;
+  try {
+    localStorage.removeItem(KEY);
+    localStorage.removeItem('ledger_install_dismissed');
+    toast('Wiped. Open the app and re-import your backup.');
+    setTimeout(inspect, 100);
+  } catch (e) { toast('Failed: ' + e.message); }
+});
+
+$('returnBtn').addEventListener('click', () => {
+  window.location.href = './';
+});
+
+inspect();
+</script>
+</body>
+</html>
