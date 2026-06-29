@@ -853,15 +853,21 @@ function todayKey() { return new Date().toISOString().slice(0, 10); }
 function rolloverIfNeeded() {
   const tk = todayKey();
   // Today no longer auto-wipes. We just update the date marker.
-  // Items only clear when manually checked off OR replaced OR cleared at shutdown.
+  if (!state.today || typeof state.today !== 'object') state.today = { date: '', items: [] };
   if (!state.today.date) state.today.date = tk;
-  if (state.shutdown.date !== tk) state.shutdown = { date: tk, completed: '', moved: '', waiting: '' };
-  // Auto-archive noise captures older than 30 days
+  if (!state.shutdown || typeof state.shutdown !== 'object' || state.shutdown.date !== tk) {
+    state.shutdown = { date: tk, completed: '', moved: '', waiting: '' };
+  }
+  // Auto-archive noise captures older than 30 days (defensive: skip null entries)
   const cutoff = Date.now() - 30 * 24 * 60 * 60 * 1000;
-  state.captures = state.captures.filter(c => !(c.kind === 'noise' && c.ts < cutoff));
+  if (Array.isArray(state.captures)) {
+    state.captures = state.captures.filter(c => c && !(c.kind === 'noise' && c.ts < cutoff));
+  } else {
+    state.captures = [];
+  }
   saveState();
 }
-rolloverIfNeeded();
+// NOTE: rolloverIfNeeded() is NOT called here. It runs after normalization at boot.
 
 function formatDate(d) {
   return d.toLocaleDateString('en-US', { weekday: 'long', month: 'long', day: 'numeric' });
@@ -953,16 +959,29 @@ function renderTabbar() {
 
 function renderMain() {
   const m = document.getElementById('main');
-  if (currentTab === 'capture') renderCapture(m);
-  else if (currentTab === 'queue') renderQueue(m);
-  else if (currentTab === 'today') renderToday(m);
-  else if (currentTab === 'domains') renderDomains(m);
-  else if (currentTab === 'deepwork') renderDeepWork(m);
-  else if (currentTab === 'dump') renderDump(m);
-  else if (currentTab === 'shutdown') renderShutdown(m);
-  else if (currentTab === 'history') renderHistory(m);
-  else if (currentTab === 'rewards') renderRewards(m);
-  else if (currentTab === 'settings') renderSettings(m);
+  try {
+    if (currentTab === 'capture') renderCapture(m);
+    else if (currentTab === 'queue') renderQueue(m);
+    else if (currentTab === 'today') renderToday(m);
+    else if (currentTab === 'domains') renderDomains(m);
+    else if (currentTab === 'deepwork') renderDeepWork(m);
+    else if (currentTab === 'dump') renderDump(m);
+    else if (currentTab === 'shutdown') renderShutdown(m);
+    else if (currentTab === 'history') renderHistory(m);
+    else if (currentTab === 'rewards') renderRewards(m);
+    else if (currentTab === 'settings') renderSettings(m);
+  } catch (e) {
+    console.error('Tab render failed:', currentTab, e);
+    m.innerHTML = `
+      <div style="padding:20px;font-family:Georgia,serif;">
+        <div style="font-size:11px;text-transform:uppercase;letter-spacing:0.18em;color:#9a3412;font-weight:600;margin-bottom:10px;font-family:ui-monospace,monospace;">Tab error</div>
+        <h1 style="font-size:22px;font-style:italic;font-weight:500;margin-bottom:14px;">This tab failed to render.</h1>
+        <p style="font-size:13px;color:#5d544a;line-height:1.55;margin-bottom:14px;">Other tabs may still work. Try switching, or open the rescue page.</p>
+        <p style="font-size:11px;background:#efe6d6;padding:10px;border-radius:3px;font-family:ui-monospace,monospace;word-break:break-word;margin-bottom:14px;">${escapeHtml(e.message || String(e))}</p>
+        <a href="./rescue.html" style="display:inline-block;background:#1a1612;color:#f6f1e8;padding:12px 16px;border-radius:2px;text-decoration:none;font-family:ui-monospace,monospace;font-size:12px;text-transform:uppercase;letter-spacing:0.06em;">Open Rescue</a>
+      </div>
+    `;
+  }
 }
 
 // ============ HEADER MENU ============
@@ -3056,22 +3075,47 @@ function showInstallBanner() {
 // ============ SERVICE WORKER ============
 if ('serviceWorker' in navigator) {
   const swCode = `
-    const CACHE = 'ledger-v2';
+    const CACHE = 'ledger-v3';
     self.addEventListener('install', e => { self.skipWaiting(); });
-    self.addEventListener('activate', e => { e.waitUntil(self.clients.claim()); });
+    self.addEventListener('activate', e => {
+      e.waitUntil(
+        caches.keys().then(keys => Promise.all(
+          keys.filter(k => k !== CACHE).map(k => caches.delete(k))
+        )).then(() => self.clients.claim())
+      );
+    });
     self.addEventListener('fetch', e => {
       if (e.request.method !== 'GET') return;
-      e.respondWith(
-        caches.open(CACHE).then(cache =>
-          cache.match(e.request).then(cached => {
-            const fetchPromise = fetch(e.request).then(resp => {
-              if (resp && resp.status === 200) cache.put(e.request, resp.clone());
-              return resp;
-            }).catch(() => cached);
-            return cached || fetchPromise;
-          })
-        )
-      );
+      const url = new URL(e.request.url);
+      // Network-first for HTML so app updates propagate immediately
+      const isHtml = e.request.mode === 'navigate' ||
+                     (e.request.destination === 'document') ||
+                     url.pathname.endsWith('.html') ||
+                     url.pathname.endsWith('/');
+      if (isHtml) {
+        e.respondWith(
+          fetch(e.request).then(resp => {
+            if (resp && resp.status === 200) {
+              const copy = resp.clone();
+              caches.open(CACHE).then(c => c.put(e.request, copy));
+            }
+            return resp;
+          }).catch(() => caches.match(e.request))
+        );
+      } else {
+        // Stale-while-revalidate for everything else (fonts, etc.)
+        e.respondWith(
+          caches.open(CACHE).then(cache =>
+            cache.match(e.request).then(cached => {
+              const fetchPromise = fetch(e.request).then(resp => {
+                if (resp && resp.status === 200) cache.put(e.request, resp.clone());
+                return resp;
+              }).catch(() => cached);
+              return cached || fetchPromise;
+            })
+          )
+        );
+      }
     });
   `;
   const blob = new Blob([swCode], { type: 'application/javascript' });
@@ -3079,35 +3123,213 @@ if ('serviceWorker' in navigator) {
   navigator.serviceWorker.register(swUrl).catch(() => {});
 }
 
-// Migrate legacy captures (pre-kind field)
-state.captures = state.captures.map(c => ({ kind: c.kind || 'signal', ...c }));
-state.queue = state.queue.map(q => ({ structure: q.structure || null, layers: q.layers || [], domainId: q.domainId || null, ...q }));
-state.deepWork = (state.deepWork || []).map(d => ({ domainId: d.domainId || null, ...d }));
-state.domains = state.domains || [];
-state.rewards = state.rewards || [];
-state.milestones = state.milestones || [];
-state.cloudSync = state.cloudSync || { enabled: false, projectId: '', apiKey: '', userId: '', lastSync: 0 };
-// Migrate from old Supabase config if found
-if (state.cloudSync && state.cloudSync.supabaseUrl !== undefined) {
-  state.cloudSync = { enabled: false, projectId: '', apiKey: '', userId: state.cloudSync.userId || '', lastSync: 0 };
+// ============ BULLETPROOF NORMALIZATION ============
+// Replaces any data corruption (null entries, wrong types, missing fields)
+// with safe defaults. Guarantees the app can boot from any localStorage state.
+function normalizeState(s) {
+  if (!s || typeof s !== 'object') s = {};
+  const out = JSON.parse(JSON.stringify(defaultState));
+
+  if (Array.isArray(s.captures)) {
+    out.captures = s.captures
+      .filter(c => c && typeof c === 'object' && typeof c.text === 'string')
+      .map(c => ({
+        id: c.id || Date.now() + Math.random(),
+        text: c.text,
+        ts: Number(c.ts) || Date.now(),
+        kind: c.kind === 'noise' ? 'noise' : 'signal',
+      }));
+  }
+
+  if (Array.isArray(s.queue)) {
+    out.queue = s.queue
+      .filter(q => q && typeof q === 'object' && typeof q.problem === 'string')
+      .map(q => ({
+        id: q.id || Date.now() + Math.random(),
+        problem: q.problem,
+        why: typeof q.why === 'string' ? q.why : '',
+        frequency: Number(q.frequency) || 3,
+        impact: Number(q.impact) || 3,
+        recurring: !!q.recurring,
+        dataSolvable: !!q.dataSolvable,
+        score: Number(q.score) || 0,
+        ts: Number(q.ts) || Date.now(),
+        structure: (q.structure && typeof q.structure === 'object') ? q.structure : null,
+        layers: Array.isArray(q.layers) ? q.layers.filter(l => typeof l === 'string') : [],
+        domainId: q.domainId || null,
+      }));
+  }
+
+  if (Array.isArray(s.domains)) {
+    out.domains = s.domains
+      .filter(d => d && typeof d === 'object' && typeof d.name === 'string')
+      .map(d => ({
+        id: d.id || 'd_' + Date.now() + Math.random(),
+        name: d.name,
+        youDep: Number(d.youDep) || 3,
+        status: d.status || 'manual',
+        intervention: typeof d.intervention === 'string' ? d.intervention : '',
+        sop: typeof d.sop === 'string' ? d.sop : '',
+        cadence: d.cadence || 'none',
+        ts: Number(d.ts) || Date.now(),
+        reviewedAt: Number(d.reviewedAt) || Date.now(),
+      }));
+  }
+
+  if (s.today && typeof s.today === 'object') {
+    out.today.date = typeof s.today.date === 'string' ? s.today.date : '';
+    const rawItems = Array.isArray(s.today.items) ? s.today.items : [];
+    out.today.items = rawItems.map(x => {
+      if (typeof x === 'string') return { text: x, done: false };
+      if (x && typeof x === 'object') return { text: String(x.text || ''), done: !!x.done };
+      return { text: '', done: false };
+    });
+    while (out.today.items.length < 3) out.today.items.push({ text: '', done: false });
+    out.today.items = out.today.items.slice(0, 3);
+  }
+
+  if (typeof s.brainDump === 'string') out.brainDump = s.brainDump;
+
+  if (s.shutdown && typeof s.shutdown === 'object') {
+    out.shutdown = {
+      date: typeof s.shutdown.date === 'string' ? s.shutdown.date : '',
+      completed: typeof s.shutdown.completed === 'string' ? s.shutdown.completed : '',
+      moved: typeof s.shutdown.moved === 'string' ? s.shutdown.moved : '',
+      waiting: typeof s.shutdown.waiting === 'string' ? s.shutdown.waiting : '',
+    };
+  }
+
+  if (Array.isArray(s.history)) {
+    out.history = s.history
+      .filter(h => h && typeof h === 'object')
+      .map(h => ({
+        date: typeof h.date === 'string' ? h.date : '',
+        ts: Number(h.ts) || Date.now(),
+        completed: typeof h.completed === 'string' ? h.completed : '',
+        moved: typeof h.moved === 'string' ? h.moved : '',
+        waiting: typeof h.waiting === 'string' ? h.waiting : '',
+        priorities: Array.isArray(h.priorities) ? h.priorities : [],
+        dumpSnapshot: typeof h.dumpSnapshot === 'string' ? h.dumpSnapshot : '',
+      }));
+  }
+
+  if (Array.isArray(s.deepWork)) {
+    out.deepWork = s.deepWork
+      .filter(d => d && typeof d === 'object')
+      .map(d => ({
+        id: d.id || Date.now() + Math.random(),
+        queueId: d.queueId,
+        problemText: typeof d.problemText === 'string' ? d.problemText : '',
+        problem: typeof d.problem === 'string' ? d.problem : '',
+        objective: typeof d.objective === 'string' ? d.objective : '',
+        variables: typeof d.variables === 'string' ? d.variables : '',
+        output: typeof d.output === 'string' ? d.output : '',
+        nextAction: typeof d.nextAction === 'string' ? d.nextAction : '',
+        ts: Number(d.ts) || Date.now(),
+        domainId: d.domainId || null,
+      }));
+  }
+
+  if (Array.isArray(s.rewards)) {
+    out.rewards = s.rewards
+      .filter(r => r && typeof r === 'object' && typeof r.name === 'string')
+      .map(r => ({
+        id: r.id || 'r_' + Date.now() + Math.random(),
+        name: r.name,
+        description: typeof r.description === 'string' ? r.description : '',
+        goal: typeof r.goal === 'string' ? r.goal : '',
+        progress: Number(r.progress) || 0,
+        target: Math.max(1, Number(r.target) || 1),
+        unit: typeof r.unit === 'string' ? r.unit : '',
+        claimed: !!r.claimed,
+        claimedAt: Number(r.claimedAt) || 0,
+        ts: Number(r.ts) || Date.now(),
+      }));
+  }
+
+  if (Array.isArray(s.milestones)) {
+    out.milestones = s.milestones
+      .filter(m => m && typeof m === 'object' && typeof m.text === 'string')
+      .map(m => ({
+        id: m.id || 'm_' + Date.now() + Math.random(),
+        text: m.text,
+        ts: Number(m.ts) || Date.now(),
+      }));
+  }
+
+  if (s.cloudSync && typeof s.cloudSync === 'object') {
+    // Convert old Supabase config to new Firebase shape
+    if (s.cloudSync.supabaseUrl !== undefined || s.cloudSync.projectId === undefined) {
+      out.cloudSync = {
+        enabled: false,
+        projectId: '',
+        apiKey: '',
+        userId: typeof s.cloudSync.userId === 'string' ? s.cloudSync.userId : '',
+        lastSync: 0,
+      };
+    } else {
+      out.cloudSync = {
+        enabled: !!s.cloudSync.enabled,
+        projectId: String(s.cloudSync.projectId || ''),
+        apiKey: String(s.cloudSync.apiKey || ''),
+        userId: String(s.cloudSync.userId || ''),
+        lastSync: Number(s.cloudSync.lastSync) || 0,
+      };
+    }
+  }
+
+  return out;
 }
-// Migrate today items to object shape
-if (state.today && Array.isArray(state.today.items)) {
-  state.today.items = state.today.items.map(x =>
-    typeof x === 'string' ? { text: x, done: false } : { text: (x && x.text) || '', done: !!(x && x.done) }
-  );
-  while (state.today.items.length < 3) state.today.items.push({ text: '', done: false });
+
+// Run normalization in a guard. If even this fails, fall back to defaults.
+try {
+  state = normalizeState(state);
+  rolloverIfNeeded();  // Safe to call now — state is clean
+  saveState();
+} catch (normErr) {
+  console.error('Normalization failed catastrophically:', normErr);
+  state = JSON.parse(JSON.stringify(defaultState));
+  try { saveState(); } catch (e) {}
 }
-saveState();
 
 // Header menu wiring
-document.getElementById('menuBtn').addEventListener('click', (e) => {
-  e.stopPropagation();
-  toggleHeaderMenu();
-});
+try {
+  document.getElementById('menuBtn').addEventListener('click', (e) => {
+    e.stopPropagation();
+    toggleHeaderMenu();
+  });
+} catch (e) { console.error('Menu wiring failed:', e); }
 
-// ============ BOOT ============
-render();
+// ============ BOOT (with error boundary) ============
+function safeRender() {
+  try {
+    render();
+  } catch (renderErr) {
+    console.error('Render failed:', renderErr);
+    const m = document.getElementById('main');
+    const tb = document.getElementById('tabbar');
+    if (tb) tb.innerHTML = '';
+    if (m) {
+      m.innerHTML = `
+        <div style="padding:20px;font-family:Georgia,serif;color:#1a1612;">
+          <div style="font-size:11px;text-transform:uppercase;letter-spacing:0.18em;color:#9a3412;font-weight:600;margin-bottom:10px;font-family:ui-monospace,monospace;">Error</div>
+          <h1 style="font-size:24px;font-style:italic;font-weight:500;margin-bottom:14px;line-height:1.2;">Something broke.</h1>
+          <p style="font-size:14px;color:#5d544a;line-height:1.55;margin-bottom:18px;">
+            The app caught an error rendering. Your data is still saved on this device.
+          </p>
+          <p style="font-size:12px;background:#efe6d6;padding:10px;border-radius:3px;font-family:ui-monospace,monospace;margin-bottom:18px;word-break:break-word;">
+            ${escapeHtml(renderErr.message || String(renderErr))}
+          </p>
+          <p style="font-size:13px;color:#5d544a;line-height:1.55;margin-bottom:14px;">
+            Try the rescue page below — it can repair corrupt data or wipe and let you re-import a backup.
+          </p>
+          <a href="./rescue.html" style="display:block;text-align:center;background:#1a1612;color:#f6f1e8;padding:14px;border-radius:2px;text-decoration:none;font-family:ui-monospace,monospace;font-size:13px;text-transform:uppercase;letter-spacing:0.06em;">Open Rescue Page</a>
+        </div>
+      `;
+    }
+  }
+}
+safeRender();
 </script>
 </body>
 </html>
