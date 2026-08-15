@@ -390,7 +390,7 @@
   }
   .today-marker { font-size: 13px; color: var(--accent); font-style: italic; font-weight: 500; min-width: 22px; }
   .today-input { flex: 1; border: none; background: transparent; font-size: 15px; line-height: 1.5; }
-  .today-input.done { text-decoration: line-through; color: var(--ink-muted); }
+  .today-input.done { color: var(--ink-soft); }
   .today-item.done { opacity: 0.55; }
   .today-check {
     width: 22px; height: 22px; border: 1.5px solid var(--ink-muted);
@@ -728,10 +728,19 @@
     position: fixed; bottom: calc(110px + env(safe-area-inset-bottom));
     left: 50%; transform: translateX(-50%);
     background: var(--ink); color: var(--bg);
-    padding: 12px 20px; border-radius: 4px;
+    padding: 11px 14px 11px 18px; border-radius: 4px;
     font-size: 13px; font-family: var(--mono);
     letter-spacing: 0.04em; z-index: 200;
     animation: slideUp 0.25s ease;
+    display: flex; align-items: center; gap: 14px;
+    max-width: calc(100vw - 32px);
+  }
+  .toast-action {
+    color: var(--bg); border: 1px solid rgba(246,241,232,0.45);
+    padding: 6px 12px; border-radius: 2px;
+    font-family: var(--mono); font-size: 11px;
+    text-transform: uppercase; letter-spacing: 0.08em;
+    font-weight: 600; white-space: nowrap; flex-shrink: 0;
   }
 
   /* Tabbar */
@@ -799,6 +808,37 @@
   }
 
   /* ===== INBOX ITEM ===== */
+  /* ===== MOOD PICKER ===== */
+  .mood-row { display: flex; gap: 6px; margin-bottom: 12px; }
+  .mood-opt {
+    flex: 1; padding: 11px 4px; border: 1px solid var(--line);
+    border-radius: 3px; background: var(--bg-card);
+    display: flex; flex-direction: column; align-items: center; gap: 5px;
+    transition: all 0.15s; color: var(--ink-soft);
+  }
+  .mood-opt.active { background: var(--ink); border-color: var(--ink); color: var(--bg); }
+  .mood-face { font-size: 17px; line-height: 1; font-family: var(--serif); }
+  .mood-label {
+    font-size: 8.5px; text-transform: uppercase; letter-spacing: 0.06em;
+    font-family: var(--mono); line-height: 1;
+  }
+
+  /* ===== UNDO ===== */
+  .undo-btn {
+    font-size: 9px; text-transform: uppercase; letter-spacing: 0.1em;
+    font-family: var(--mono); color: var(--accent);
+    padding: 4px 8px; border: 1px solid transparent;
+    border-radius: 2px; flex-shrink: 0;
+    text-decoration: none !important;
+    font-weight: 600;
+  }
+  .undo-btn:active { border-color: var(--line); }
+  .done-row { align-items: center; }
+
+  /* ===== INBOX with checkbox ===== */
+  .inbox-top { display: flex; align-items: flex-start; gap: 11px; margin-bottom: 12px; }
+  .inbox-top .inbox-text { margin-bottom: 0; flex: 1; }
+
   .inbox-card {
     background: var(--bg-card); border: 1px solid var(--line);
     border-radius: 4px; padding: 14px 16px;
@@ -895,7 +935,7 @@
   }
   .primary-body { flex: 1; min-width: 0; }
   .primary-text { font-size: 15px; line-height: 1.45; }
-  .primary-text.done { text-decoration: line-through; color: var(--ink-muted); }
+  .primary-text.done { color: var(--ink-soft); }
   .primary-why {
     font-size: 12px; color: var(--ink-muted); font-style: italic;
     margin-top: 5px; line-height: 1.45;
@@ -910,11 +950,11 @@
     margin-bottom: 6px;
   }
   .supporting-text { flex: 1; font-size: 13px; line-height: 1.4; }
-  .supporting-text.done { text-decoration: line-through; color: var(--ink-muted); }
+  .supporting-text.done { color: var(--ink-soft); }
   .done-row {
     display: flex; align-items: center; gap: 10px;
-    padding: 9px 12px; font-size: 13px; color: var(--ink-muted);
-    text-decoration: line-through; line-height: 1.4;
+    padding: 9px 12px; font-size: 13px; color: var(--ink-soft);
+    line-height: 1.4;
   }
   .check-circle {
     width: 20px; height: 20px; border: 1.5px solid var(--ink-muted);
@@ -1052,7 +1092,7 @@
     flex: 1; border: none; background: transparent;
     font-size: 14px; line-height: 1.45; padding: 2px 0;
   }
-  .step-input.done { text-decoration: line-through; color: var(--ink-muted); }
+  .step-input.done { color: var(--ink-soft); }
   .sub-row {
     display: flex; align-items: center; gap: 8px;
     padding: 7px 0 7px 30px;
@@ -1061,7 +1101,7 @@
     flex: 1; border: none; background: transparent;
     font-size: 13px; line-height: 1.4; color: var(--ink-soft);
   }
-  .sub-input.done { text-decoration: line-through; color: var(--ink-muted); }
+  .sub-input.done { color: var(--ink-soft); }
   .step-actions { display: flex; gap: 2px; }
   .step-progress {
     font-size: 11px; font-family: var(--mono); color: var(--ink-muted);
@@ -1158,6 +1198,16 @@ const STORAGE_KEY = 'ledger_v1';
 
 const MISSION = "Build a system-driven business where my attention is primarily on Sales, Marketing & Demand — not routine operations.";
 
+const MOODS = [
+  { id: 'drained',   face: '○',  label: 'Drained' },
+  { id: 'scattered', face: '◌',  label: 'Scattered' },
+  { id: 'steady',    face: '◐',  label: 'Steady' },
+  { id: 'focused',   face: '◑',  label: 'Focused' },
+  { id: 'strong',    face: '●',  label: 'Strong' },
+];
+function moodLabel(id) { const m = MOODS.find(x => x.id === id); return m ? m.label : ''; }
+function moodFace(id) { const m = MOODS.find(x => x.id === id); return m ? m.face : ''; }
+
 const defaultState = {
   items: [],        // unified item model — see normalizeState for shape
   domains: [],
@@ -1165,7 +1215,7 @@ const defaultState = {
   rewards: [],
   milestones: [],
   history: [],
-  shutdown: { date: '', movedForward: '' },
+  shutdown: { date: '', movedForward: '', mood: null, moodNote: '' },
   brainDump: '',
   people: [],       // delegate owners, remembered for quick pick
   cloudSync: { enabled: false, projectId: '', apiKey: '', userId: '', lastSync: 0 },
@@ -1263,6 +1313,7 @@ function stepProgress(it) {
 function markDone(id) {
   const it = state.items.find(x => x.id === id);
   if (!it) return;
+  it.prevStatus = it.status;          // remember where it came from
   it.status = 'done';
   it.doneAt = Date.now();
   saveState();
@@ -1270,9 +1321,28 @@ function markDone(id) {
 function unDone(id, back) {
   const it = state.items.find(x => x.id === id);
   if (!it) return;
-  it.status = back || 'today';
+  const target = back || it.prevStatus || 'today';
+  it.status = target;
   it.doneAt = null;
+  it.prevStatus = null;
+  // If it's going back to Today but has no todayMeta, give it one
+  if (target === 'today' && !it.todayMeta) {
+    const full = todayPrimary().length >= 3;
+    it.todayMeta = { tier: full ? 'supporting' : 'primary', date: todayKey(), whyToday: '', whatIfNot: '' };
+  }
   saveState();
+}
+// Mark done + offer an undo toast. Used everywhere a checkbox is tapped.
+function markDoneWithUndo(id) {
+  const it = state.items.find(x => x.id === id);
+  if (!it) return;
+  const label = itemLabel(it);
+  markDone(id);
+  render();
+  showToast('Done: ' + (label.length > 24 ? label.slice(0, 24) + '…' : label), {
+    label: 'Undo',
+    onClick: () => { unDone(id); showToast('Restored'); render(); },
+  });
 }
 function domainById(id) { return state.domains.find(d => d.id === id); }
 
@@ -1449,13 +1519,30 @@ function renderCapture(root) {
       <button class="btn-primary-full" id="captureBtn" disabled>${icons.plus}<span>Capture</span></button>
     </div>
 
+    ${doneToday().length ? `
+      <div class="divider"><span class="divider-text">Done today · ${doneToday().length}</span></div>
+      <div class="list">
+        ${doneToday().slice(0, 6).map(it => `
+          <div class="done-row" style="padding:8px 4px;">
+            <button class="check-circle sm checked" data-cap-undone="${it.id}">${icons.checkTiny}</button>
+            <span style="flex:1;">${nl2br(itemLabel(it))}</span>
+            <button class="undo-btn" data-cap-undone="${it.id}">Undo</button>
+          </div>
+        `).join('')}
+        ${doneToday().length > 6 ? `<div class="close-auto-empty" style="padding-left:4px;">+ ${doneToday().length - 6} more — see Close</div>` : ''}
+      </div>
+    ` : ''}
+
     <div class="divider"><span class="divider-text">${inbox.length === 0 ? 'Inbox empty' : inbox.length + ' waiting to process'}</span></div>
     <div class="list">
       ${inbox.length === 0
         ? '<div class="empty">Nothing to process. Capture something above.</div>'
         : inbox.map(it => `
           <div class="inbox-card">
-            <div class="inbox-text">${nl2br(it.text)}</div>
+            <div class="inbox-top">
+              <button class="check-circle" data-cap-done="${it.id}" title="Mark done"></button>
+              <div class="inbox-text">${nl2br(it.text)}</div>
+            </div>
             <div class="inbox-meta">
               <span class="inbox-time">${timeAgo(it.ts)}</span>
               <div style="display:flex;gap:6px;align-items:center;">
@@ -1476,6 +1563,12 @@ function renderCapture(root) {
   });
   btn.addEventListener('click', () => doCapture(ta));
 
+  document.querySelectorAll('[data-cap-done]').forEach(b => {
+    b.addEventListener('click', () => markDoneWithUndo(b.dataset.capDone));
+  });
+  document.querySelectorAll('[data-cap-undone]').forEach(b => {
+    b.addEventListener('click', () => { unDone(b.dataset.capUndone, 'inbox'); showToast('Restored'); render(); });
+  });
   document.querySelectorAll('[data-process]').forEach(b => {
     b.addEventListener('click', () => openProcess(b.dataset.process));
   });
@@ -2043,6 +2136,7 @@ function renderToday(root) {
         <div class="done-row">
           <button class="check-circle sm checked" data-undone="${it.id}">${icons.checkTiny}</button>
           <span style="flex:1;">${nl2br(itemLabel(it))}</span>
+          <button class="undo-btn" data-undone="${it.id}">Undo</button>
         </div>
       `).join('')}
     ` : ''}
@@ -2068,10 +2162,10 @@ function primarySlotHTML(it, i) {
 
 function bindTodayHandlers() {
   document.querySelectorAll('[data-done]').forEach(b => b.addEventListener('click', () => {
-    markDone(b.dataset.done); render();
+    markDoneWithUndo(b.dataset.done);
   }));
   document.querySelectorAll('[data-undone]').forEach(b => b.addEventListener('click', () => {
-    unDone(b.dataset.undone, 'today'); render();
+    unDone(b.dataset.undone); showToast('Restored'); render();
   }));
   document.querySelectorAll('[data-steps]').forEach(b => b.addEventListener('click', () => {
     openStepsSheet(b.dataset.steps);
@@ -2668,7 +2762,7 @@ function schedCardHTML(it, tk) {
 // ============ 13. CLOSE / SHUTDOWN ============
 function renderClose(root) {
   if (!state.shutdown || state.shutdown.date !== todayKey()) {
-    state.shutdown = { date: todayKey(), movedForward: '' };
+    state.shutdown = { date: todayKey(), movedForward: '', mood: null, moodNote: '' };
   }
   const done = doneToday();
   const openItems = [...todayPrimary(), ...todaySupporting(), ...nowItems()];
@@ -2684,12 +2778,37 @@ function renderClose(root) {
       <div class="close-auto-label">Done Today · ${done.length}</div>
       ${done.length === 0
         ? '<div class="close-auto-empty">Nothing marked complete today.</div>'
-        : done.map(it => `<div class="close-auto-item">· ${escapeHtml(itemLabel(it))}</div>`).join('')}
+        : done.map(it => `
+          <div class="done-row" style="padding:7px 0;">
+            <button class="check-circle sm checked" data-close-undone="${it.id}">${icons.checkTiny}</button>
+            <span style="flex:1;">${escapeHtml(itemLabel(it))}</span>
+            <button class="undo-btn" data-close-undone="${it.id}">Undo</button>
+          </div>
+        `).join('')}
     </div>
 
     <div class="sd-field">
       <div class="sd-head">
         <span class="sd-num">01</span>
+        <div>
+          <div class="sd-label">How did the day feel?</div>
+          <div class="sd-sub">Not what you finished — how it actually felt. Pick one, add a line if you want.</div>
+        </div>
+      </div>
+      <div class="mood-row">
+        ${MOODS.map(m => `
+          <button class="mood-opt ${state.shutdown.mood === m.id ? 'active' : ''}" data-mood="${m.id}" title="${m.label}">
+            <span class="mood-face">${m.face}</span>
+            <span class="mood-label">${m.label}</span>
+          </button>
+        `).join('')}
+      </div>
+      <textarea class="sd-textarea" id="moodNote" rows="2" placeholder="Optional — why did it feel that way?">${escapeHtml(state.shutdown.moodNote || '')}</textarea>
+    </div>
+
+    <div class="sd-field">
+      <div class="sd-head">
+        <span class="sd-num">02</span>
         <div>
           <div class="sd-label">Moved forward</div>
           <div class="sd-sub">What meaningfully advanced today? Completion isn't the same as progress.</div>
@@ -2716,7 +2835,7 @@ function renderClose(root) {
       <div class="list">
         ${state.history.slice(0, 3).map(h => `
           <div class="history-card">
-            <div class="history-date">${formatDate(new Date(h.ts))}</div>
+            <div class="history-date">${formatDate(new Date(h.ts))}${h.mood ? ` · ${moodFace(h.mood)} ${moodLabel(h.mood)}` : ''}</div>
             ${h.movedForward ? `<div class="history-row"><span class="history-label">Moved</span>${nl2br(h.movedForward)}</div>` : ''}
             <div class="history-row"><span class="history-label">Done</span>${h.doneCount || 0} items</div>
           </div>
@@ -2729,6 +2848,19 @@ function renderClose(root) {
     state.shutdown.movedForward = e.target.value;
     saveState();
   });
+  document.getElementById('moodNote').addEventListener('input', e => {
+    state.shutdown.moodNote = e.target.value;
+    saveState();
+  });
+  document.querySelectorAll('[data-mood]').forEach(b => b.addEventListener('click', () => {
+    state.shutdown.mood = state.shutdown.mood === b.dataset.mood ? null : b.dataset.mood;
+    saveState();
+    document.querySelectorAll('[data-mood]').forEach(x => x.classList.remove('active'));
+    if (state.shutdown.mood) b.classList.add('active');
+  }));
+  document.querySelectorAll('[data-close-undone]').forEach(b => b.addEventListener('click', () => {
+    unDone(b.dataset.closeUndone); showToast('Restored'); render();
+  }));
   document.querySelectorAll('[data-next]').forEach(inp => inp.addEventListener('input', e => {
     const it = state.items.find(x => x.id === inp.dataset.next);
     if (it) { it.nextAction = e.target.value; saveState(); }
@@ -2743,6 +2875,8 @@ function renderClose(root) {
         state.history.unshift({
           date: todayKey(), ts: Date.now(),
           movedForward: state.shutdown.movedForward || '',
+          mood: state.shutdown.mood || null,
+          moodNote: state.shutdown.moodNote || '',
           doneCount: done.length,
           doneItems: done.map(i => itemLabel(i)),
           openItems: openItems.map(i => ({ text: itemLabel(i), nextAction: i.nextAction || '' })),
@@ -2752,7 +2886,7 @@ function renderClose(root) {
         openItems.forEach(it => {
           if (it.status === 'today' && it.todayMeta) it.todayMeta.date = todayKey();
         });
-        state.shutdown = { date: todayKey(), movedForward: '' };
+        state.shutdown = { date: todayKey(), movedForward: '', mood: null, moodNote: '' };
         saveState();
         showToast('Day closed');
         render();
@@ -2986,12 +3120,13 @@ function renderHistory(root) {
               <div>
                 <div style="font-size:14px;font-weight:500;font-style:italic;">${formatDate(new Date(d.ts))}${d.date === todayKey() ? ' · today' : ''}</div>
                 <div style="font-size:11px;color:var(--ink-muted);font-family:var(--mono);margin-top:4px;">
-                  ${d.captured.length} captured · ${d.done.length} done · ${d.deep.length} deep${d.close ? ' · closed' : ''}
+                  ${d.captured.length} captured · ${d.done.length} done · ${d.deep.length} deep${d.close ? ' · closed' : ''}${d.close && d.close.mood ? ' · ' + moodFace(d.close.mood) + ' ' + moodLabel(d.close.mood) : ''}
                 </div>
               </div>
               <span id="chev-${i}">${i === 0 ? icons.chevronUp : icons.chevronDown}</span>
             </button>
             <div id="body-${i}" style="display:${i===0?'block':'none'};padding:0 16px 16px;">
+              ${d.close && d.close.mood ? `<div class="history-row"><span class="history-label">Felt</span>${moodFace(d.close.mood)} ${moodLabel(d.close.mood)}${d.close.moodNote ? ' — ' + escapeHtml(d.close.moodNote) : ''}</div>` : ''}
               ${d.close && d.close.movedForward ? `<div class="history-row"><span class="history-label">Moved</span>${nl2br(d.close.movedForward)}</div>` : ''}
               ${d.done.length ? `<div style="margin-top:12px;"><div class="history-label" style="display:block;margin-bottom:6px;">Completed</div>
                 ${d.done.map(x => `<div style="font-size:12px;line-height:1.5;color:var(--ink-soft);">· ${escapeHtml(itemLabel(x))}</div>`).join('')}</div>` : ''}
@@ -3358,10 +3493,23 @@ function importData(e) {
 }
 
 // ============ TOAST / CONFIRM ============
-function showToast(msg) {
+let toastTimer = null;
+function showToast(msg, action) {
   const r = document.getElementById('toast-root');
-  r.innerHTML = `<div class="toast">${escapeHtml(msg)}</div>`;
-  setTimeout(() => { if (r.firstChild) r.innerHTML = ''; }, 2200);
+  if (toastTimer) clearTimeout(toastTimer);
+  r.innerHTML = `<div class="toast">
+    <span>${escapeHtml(msg)}</span>
+    ${action ? `<button class="toast-action" id="toastAction">${escapeHtml(action.label)}</button>` : ''}
+  </div>`;
+  if (action) {
+    const b = document.getElementById('toastAction');
+    if (b) b.addEventListener('click', () => {
+      if (toastTimer) clearTimeout(toastTimer);
+      r.innerHTML = '';
+      action.onClick();
+    });
+  }
+  toastTimer = setTimeout(() => { r.innerHTML = ''; toastTimer = null; }, action ? 6000 : 2200);
 }
 function confirmDialog({ title, message, okText = 'Delete', cancelText = 'Cancel', danger = true, onConfirm }) {
   const r = document.getElementById('confirm-root');
@@ -3560,13 +3708,20 @@ function normalizeState(s) {
     out.history = s.history.filter(h => h && typeof h === 'object').map(h => ({
       date: String(h.date||''), ts: Number(h.ts)||Date.now(),
       movedForward: String(h.movedForward || h.moved || ''),
+      mood: MOODS.some(m => m.id === h.mood) ? h.mood : null,
+      moodNote: String(h.moodNote || ''),
       doneCount: Number(h.doneCount)||0,
       doneItems: Array.isArray(h.doneItems) ? h.doneItems : [],
       openItems: Array.isArray(h.openItems) ? h.openItems : [],
     }));
   }
   if (s.shutdown && typeof s.shutdown === 'object') {
-    out.shutdown = { date: String(s.shutdown.date||''), movedForward: String(s.shutdown.movedForward || s.shutdown.moved || '') };
+    out.shutdown = {
+      date: String(s.shutdown.date||''),
+      movedForward: String(s.shutdown.movedForward || s.shutdown.moved || ''),
+      mood: MOODS.some(m => m.id === s.shutdown.mood) ? s.shutdown.mood : null,
+      moodNote: String(s.shutdown.moodNote || ''),
+    };
   }
   if (typeof s.brainDump === 'string') out.brainDump = s.brainDump;
   if (Array.isArray(s.people)) out.people = s.people.filter(p => typeof p === 'string');
@@ -3586,7 +3741,7 @@ function normalizeState(s) {
 try {
   state = normalizeState(state);
   if (!state.shutdown || state.shutdown.date !== todayKey()) {
-    state.shutdown = { date: todayKey(), movedForward: '' };
+    state.shutdown = { date: todayKey(), movedForward: '', mood: null, moodNote: '' };
   }
   saveState();
 } catch (e) {
