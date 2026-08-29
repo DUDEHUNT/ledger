@@ -808,6 +808,30 @@
   }
 
   /* ===== INBOX ITEM ===== */
+  /* ===== FROM DEEP ===== */
+  .from-deep {
+    background: var(--line-soft); border-left: 2px solid var(--accent);
+    border-radius: 0 3px 3px 0; padding: 9px 11px; margin-bottom: 12px;
+  }
+  .from-deep-label {
+    display: block; font-size: 9px; text-transform: uppercase;
+    letter-spacing: 0.12em; color: var(--accent); font-family: var(--mono);
+    font-weight: 600; margin-bottom: 5px;
+  }
+  .from-deep-line {
+    font-size: 11.5px; line-height: 1.5; color: var(--ink-soft);
+    margin-bottom: 2px;
+  }
+  .from-deep-line em { color: var(--ink-muted); font-style: normal; font-family: var(--mono); font-size: 10px; text-transform: uppercase; letter-spacing: 0.06em; }
+
+  /* ===== SUBTASK CHECK ===== */
+  .sc-text {
+    flex: 1; font-size: 14px; line-height: 1.45; color: var(--ink);
+    padding-top: 2px;
+  }
+  .sc-text.sub { font-size: 13px; color: var(--ink-soft); }
+  .sc-text.ticked { color: var(--ink-soft); }
+
   /* ===== MOOD PICKER ===== */
   .mood-row { display: flex; gap: 6px; margin-bottom: 12px; }
   .mood-opt {
@@ -1336,12 +1360,138 @@ function unDone(id, back) {
 function markDoneWithUndo(id) {
   const it = state.items.find(x => x.id === id);
   if (!it) return;
+  // If there are unfinished steps/subtasks, confirm what actually got done first
+  const prog = stepProgress(it);
+  if (prog && prog.done < prog.total) { openSubtaskCheck(id); return; }
+  finishItem(id);
+}
+
+function finishItem(id) {
+  const it = state.items.find(x => x.id === id);
+  if (!it) return;
   const label = itemLabel(it);
   markDone(id);
   render();
   showToast('Done: ' + (label.length > 24 ? label.slice(0, 24) + '…' : label), {
     label: 'Undo',
     onClick: () => { unDone(id); showToast('Restored'); render(); },
+  });
+}
+
+// ===== SUBTASK CONFIRMATION =====
+let subCheck = null;   // { itemId, marks: { 'i' | 'i:j' : bool } }
+
+function openSubtaskCheck(itemId) {
+  const it = state.items.find(x => x.id === itemId);
+  if (!it) return;
+  subCheck = { itemId, marks: {} };
+  // Pre-tick anything already complete
+  it.steps.forEach((s, i) => {
+    if (s.done) subCheck.marks[i] = true;
+    (s.subs || []).forEach((sb, j) => { if (sb.done) subCheck.marks[i + ':' + j] = true; });
+  });
+  renderSubtaskCheck();
+}
+
+function renderSubtaskCheck() {
+  const it = state.items.find(x => x.id === subCheck.itemId);
+  if (!it) { closeModal(); return; }
+  const prog = stepProgress(it);
+  const marked = Object.values(subCheck.marks).filter(Boolean).length;
+  const allTicked = marked === prog.total;
+
+  document.getElementById('modal-root').innerHTML = `
+    <div class="modal-overlay" id="modalOverlay">
+      <div class="modal" id="modalBody">
+        <div class="modal-head">
+          <div class="modal-eyebrow">Before closing this</div>
+          <button class="icon-btn" id="closeModal">${icons.xBig}</button>
+        </div>
+        <div class="modal-problem">"${escapeHtml(itemLabel(it))}"</div>
+        <div class="principle-note">
+          <strong>${prog.total - prog.done} of ${prog.total} steps are still open.</strong>
+          Tick what you actually finished. Anything left unticked stays open.
+        </div>
+
+        <button class="mini-btn ${allTicked ? 'active' : ''}" id="tickAllBtn" style="width:100%;justify-content:center;margin-bottom:14px;padding:12px;">
+          ${allTicked ? icons.checkSmall : ''}<span>${allTicked ? 'All ticked' : 'Tick everything'}</span>
+        </button>
+
+        <div id="subCheckList">
+          ${it.steps.map((s, i) => `
+            <div class="step-row">
+              <button class="check-circle sm ${subCheck.marks[i] ? 'checked' : ''}" data-sc="${i}">${subCheck.marks[i] ? icons.checkTiny : ''}</button>
+              <span class="step-num">${i + 1}</span>
+              <span class="sc-text ${subCheck.marks[i] ? 'ticked' : ''}">${escapeHtml(s.text || '(untitled step)')}</span>
+            </div>
+            ${(s.subs || []).map((sb, j) => `
+              <div class="sub-row">
+                <button class="check-circle sm ${subCheck.marks[i+':'+j] ? 'checked' : ''}" data-sc="${i}:${j}">${subCheck.marks[i+':'+j] ? icons.checkTiny : ''}</button>
+                <span class="sc-text sub ${subCheck.marks[i+':'+j] ? 'ticked' : ''}">${escapeHtml(sb.text || '(untitled subtask)')}</span>
+              </div>
+            `).join('')}
+          `).join('')}
+        </div>
+
+        <div style="display:flex;gap:8px;margin-top:20px;">
+          <button class="btn-secondary-full" id="scSaveOnly">Save, keep open</button>
+          <button class="btn-primary-full" id="scComplete">${icons.check}<span>Complete task</span></button>
+        </div>
+        <p class="sub" style="margin-top:10px;font-size:11px;text-align:center;">
+          "Complete task" closes the whole thing regardless of unticked steps.
+        </p>
+      </div>
+    </div>
+  `;
+
+  document.getElementById('modalOverlay').addEventListener('click', closeModal);
+  document.getElementById('modalBody').addEventListener('click', e => e.stopPropagation());
+  document.getElementById('closeModal').addEventListener('click', closeModal);
+
+  document.querySelectorAll('[data-sc]').forEach(b => b.addEventListener('click', () => {
+    const k = b.dataset.sc;
+    subCheck.marks[k] = !subCheck.marks[k];
+    // Ticking a parent step ticks its subtasks; unticking clears them
+    if (!k.includes(':')) {
+      const i = Number(k);
+      (it.steps[i].subs || []).forEach((_, j) => { subCheck.marks[i + ':' + j] = subCheck.marks[k]; });
+    }
+    renderSubtaskCheck();
+  }));
+
+  document.getElementById('tickAllBtn').addEventListener('click', () => {
+    const target = !allTicked;
+    subCheck.marks = {};
+    if (target) {
+      it.steps.forEach((s, i) => {
+        subCheck.marks[i] = true;
+        (s.subs || []).forEach((_, j) => { subCheck.marks[i + ':' + j] = true; });
+      });
+    }
+    renderSubtaskCheck();
+  });
+
+  const applyMarks = () => {
+    it.steps.forEach((s, i) => {
+      s.done = !!subCheck.marks[i];
+      (s.subs || []).forEach((sb, j) => { sb.done = !!subCheck.marks[i + ':' + j]; });
+    });
+    saveState();
+  };
+
+  document.getElementById('scSaveOnly').addEventListener('click', () => {
+    applyMarks();
+    const id = subCheck.itemId;
+    closeModal();
+    showToast('Steps updated — task still open');
+    render();
+  });
+
+  document.getElementById('scComplete').addEventListener('click', () => {
+    applyMarks();
+    const id = subCheck.itemId;
+    closeModal();
+    finishItem(id);
   });
 }
 function domainById(id) { return state.domains.find(d => d.id === id); }
@@ -1378,6 +1528,7 @@ const icons = {
   trashBig: '<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6"><path d="M3 6h18"/><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6"/></svg>',
   info: '<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><circle cx="12" cy="12" r="10"/><path d="M12 16v-4"/><path d="M12 8h.01"/></svg>',
   trophy: '<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M6 9H4.5a2.5 2.5 0 0 1 0-5H6"/><path d="M18 9h1.5a2.5 2.5 0 0 0 0-5H18"/><path d="M4 22h16"/><path d="M10 14.66V17c0 .55-.47.98-.97 1.21C7.85 18.75 7 20.24 7 22"/><path d="M14 14.66V17c0 .55.47.98.97 1.21C16.15 18.75 17 20.24 17 22"/><path d="M18 2H6v7a6 6 0 0 0 12 0V2Z"/></svg>',
+  brainSm: '<svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="vertical-align:-1px;"><path d="M12 5a3 3 0 1 0-5.997.125 4 4 0 0 0-2.526 5.77 4 4 0 0 0 .556 6.588A4 4 0 1 0 12 18Z"/><path d="M12 5a3 3 0 1 1 5.997.125 4 4 0 0 1 2.526 5.77 4 4 0 0 1-.556 6.588A4 4 0 1 1 12 18Z"/></svg>',
   zap: '<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"/></svg>',
   sync: '<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M3 12a9 9 0 0 1 15-6.7L21 8"/><path d="M21 3v5h-5"/><path d="M21 12a9 9 0 0 1-15 6.7L3 16"/><path d="M8 16H3v5"/></svg>',
 };
@@ -1543,6 +1694,13 @@ function renderCapture(root) {
               <button class="check-circle" data-cap-done="${it.id}" title="Mark done"></button>
               <div class="inbox-text">${nl2br(it.text)}</div>
             </div>
+            ${it.deepContext ? `
+              <div class="from-deep">
+                <span class="from-deep-label">Next test from Deep</span>
+                ${it.deepContext.problem ? `<div class="from-deep-line"><em>Problem:</em> ${escapeHtml(it.deepContext.problem.slice(0, 140))}</div>` : ''}
+                ${it.deepContext.system ? `<div class="from-deep-line"><em>System:</em> ${escapeHtml(it.deepContext.system.slice(0, 140))}</div>` : ''}
+              </div>
+            ` : ''}
             <div class="inbox-meta">
               <span class="inbox-time">${timeAgo(it.ts)}</span>
               <div style="display:flex;gap:6px;align-items:center;">
@@ -2153,6 +2311,7 @@ function primarySlotHTML(it, i) {
       <div class="primary-body">
         <div class="primary-text">${nl2br(itemLabel(it))}</div>
         ${it.todayMeta && it.todayMeta.whyToday ? `<div class="primary-why">${escapeHtml(it.todayMeta.whyToday)}</div>` : ''}
+        ${it.deepContext ? `<div class="primary-why">${icons.brainSm} From Deep — ${escapeHtml((it.deepContext.problem || it.deepContext.sourceText || '').slice(0, 70))}</div>` : ''}
         ${prog ? `<div class="primary-why">${prog.done}/${prog.total} steps</div>` : ''}
       </div>
       <button class="icon-btn" data-steps="${it.id}">${icons.list}</button>
@@ -2523,17 +2682,49 @@ function renderDeepSession(root) {
   document.getElementById('closeDeep').addEventListener('click', () => {
     if (!deepDraft.nextTest.trim()) return;
     const it = state.items.find(x => x.id === deepDraft.itemId);
+    const sessionId = uid('dw');
+    const nextTest = deepDraft.nextTest.trim();
+    const label = (deepDraft.problem.trim() || deepDraft.sourceText || 'Problem').slice(0, 90);
+
     state.deepWork.unshift({
-      id: uid('dw'), itemId: deepDraft.itemId, sourceText: deepDraft.sourceText,
+      id: sessionId, itemId: deepDraft.itemId, sourceText: deepDraft.sourceText,
       problem: deepDraft.problem.trim(), impact: deepDraft.impact.trim(),
       cause: deepDraft.cause.trim(), system: deepDraft.system.trim(),
-      nextTest: deepDraft.nextTest.trim(), ts: Date.now(),
+      nextTest, ts: Date.now(),
       domainId: it ? it.domainId : null,
     });
     state.deepWork = state.deepWork.slice(0, 60);
-    if (it) it.nextAction = deepDraft.nextTest.trim();
+    if (it) it.nextAction = nextTest;
+
+    // 1. Record the session itself as completed work — shows in Done Today / Close
+    state.items.unshift({
+      id: uid('i'),
+      text: 'Deep session — ' + label,
+      ts: Date.now(), status: 'done', doneAt: Date.now(), prevStatus: null,
+      needsMe: true, nowMeta: null, todayMeta: null, delegateMeta: null,
+      scheduleMeta: null, classification: null, signal: null,
+      itemType: 'task', steps: [], domainId: it ? it.domainId : null,
+      nextAction: '', fromDeep: sessionId,
+    });
+
+    // 2. Push the Next Test into Capture so it can be routed and picked up later
+    state.items.unshift({
+      id: uid('i'),
+      text: nextTest,
+      ts: Date.now(), status: 'inbox', doneAt: null, prevStatus: null,
+      needsMe: null, nowMeta: null, todayMeta: null, delegateMeta: null,
+      scheduleMeta: null, classification: null, signal: null,
+      itemType: null, steps: [], domainId: it ? it.domainId : null,
+      nextAction: '', fromDeep: sessionId,
+      deepContext: { problem: deepDraft.problem.trim(), system: deepDraft.system.trim(), sourceText: deepDraft.sourceText },
+    });
+
     saveState(); stopDwTimer(); deepDraft = null;
-    showToast('Loop closed'); render();
+    showToast('Loop closed — next test sent to Capture', {
+      label: 'Go there',
+      onClick: () => { currentTab = 'capture'; render(); },
+    });
+    render();
   });
 }
 
@@ -3533,7 +3724,7 @@ function confirmDialog({ title, message, okText = 'Delete', cancelText = 'Cancel
 }
 function closeModal() {
   document.getElementById('modal-root').innerHTML = '';
-  proc = null; stepsItemId = null;
+  proc = null; stepsItemId = null; subCheck = null;
 }
 
 // ============ INSTALL PROMPT ============
@@ -3616,7 +3807,10 @@ function normalizeState(s) {
       })) : [],
       domainId: i.domainId || null,
       doneAt: Number(i.doneAt) || null,
+      prevStatus: i.prevStatus || null,
       nextAction: String(i.nextAction || ''),
+      fromDeep: i.fromDeep || null,
+      deepContext: i.deepContext && typeof i.deepContext === 'object' ? i.deepContext : null,
     }));
   }
 
