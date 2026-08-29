@@ -808,6 +808,91 @@
   }
 
   /* ===== INBOX ITEM ===== */
+  /* ===== GOAL ===== */
+  .compass-unset { border-style: solid; border-color: var(--accent); cursor: pointer; }
+  .compass-cta {
+    margin-top: 10px; font-size: 11px; font-family: var(--mono);
+    text-transform: uppercase; letter-spacing: 0.1em; color: var(--accent);
+    font-weight: 600; display: flex; align-items: center; gap: 6px;
+  }
+  .compass-metric {
+    display: flex; justify-content: space-between; align-items: baseline;
+    margin-top: 10px; font-size: 11px; font-family: var(--mono);
+    color: var(--ink-soft); gap: 10px;
+  }
+  .compass-metric-nums { color: var(--accent); font-weight: 600; white-space: nowrap; }
+  .compass-bar {
+    height: 4px; background: var(--line); border-radius: 2px;
+    overflow: hidden; margin-top: 6px;
+  }
+  .compass-bar-fill { height: 100%; background: var(--accent); transition: width 0.4s; }
+
+  .goal-progress {
+    height: 3px; background: var(--line); border-radius: 2px;
+    overflow: hidden; margin-bottom: 22px;
+  }
+  .goal-progress-fill { height: 100%; background: var(--accent); transition: width 0.3s; }
+
+  .goal-review, .goal-detail {
+    background: var(--bg-card); border: 1px solid var(--line);
+    border-radius: 4px; padding: 4px 16px;
+  }
+  .goal-review-row, .goal-detail-row {
+    padding: 13px 0; border-bottom: 1px solid var(--line-soft);
+    font-size: 14px; line-height: 1.5;
+  }
+  .goal-review-row:last-child, .goal-detail-row:last-child { border-bottom: none; }
+  .goal-review-label {
+    display: block; font-size: 9px; text-transform: uppercase;
+    letter-spacing: 0.14em; color: var(--accent); font-family: var(--mono);
+    font-weight: 600; margin-bottom: 5px;
+  }
+
+  .goal-card {
+    background: var(--bg-card); border: 1px solid var(--line);
+    border-left: 3px solid var(--accent);
+    border-radius: 4px; padding: 18px; margin-bottom: 14px;
+  }
+  .goal-metric-head {
+    display: flex; justify-content: space-between; align-items: baseline;
+    gap: 12px; margin-bottom: 14px;
+  }
+  .goal-metric-name {
+    font-size: 12px; font-family: var(--mono); text-transform: uppercase;
+    letter-spacing: 0.1em; color: var(--ink-soft); flex: 1;
+  }
+  .goal-metric-val {
+    font-size: 30px; font-style: italic; font-weight: 500;
+    color: var(--accent); line-height: 1; white-space: nowrap;
+  }
+  .goal-metric-target { font-size: 14px; color: var(--ink-muted); font-style: normal; }
+  .goal-bar {
+    height: 8px; background: var(--line); border-radius: 4px; overflow: hidden;
+  }
+  .goal-bar-fill { height: 100%; background: var(--accent); transition: width 0.4s; }
+  .goal-bar-labels {
+    display: flex; justify-content: space-between; margin-top: 7px;
+    font-size: 10px; font-family: var(--mono); color: var(--ink-muted);
+    text-transform: uppercase; letter-spacing: 0.06em;
+  }
+  .goal-timeline {
+    display: flex; justify-content: space-between; margin-top: 14px;
+    padding-top: 12px; border-top: 1px solid var(--line-soft);
+    font-size: 11px; font-family: var(--mono); color: var(--ink-muted);
+    letter-spacing: 0.04em;
+  }
+  .goal-locked {
+    display: flex; gap: 14px; align-items: flex-start;
+    background: var(--line-soft); border-radius: 4px; padding: 16px;
+    color: var(--ink-soft);
+  }
+  .goal-locked svg { color: var(--accent); flex-shrink: 0; margin-top: 2px; }
+  .goal-locked-title {
+    font-size: 14px; font-style: italic; font-weight: 500;
+    color: var(--ink); margin-bottom: 6px;
+  }
+  .goal-locked-sub { font-size: 12px; line-height: 1.55; }
+
   /* ===== FROM DEEP ===== */
   .from-deep {
     background: var(--line-soft); border-left: 2px solid var(--accent);
@@ -1220,7 +1305,39 @@
 // ============ STATE ============
 const STORAGE_KEY = 'ledger_v1';
 
-const MISSION = "Build a system-driven business where my attention is primarily on Sales, Marketing & Demand — not routine operations.";
+const DEFAULT_MISSION = "Set your 3-month goal to focus the system.";
+const LOCK_DAYS = 90;
+const GRACE_HOURS = 24;   // typo window right after setting
+
+function goalIsSet() { return !!(state.goal && state.goal.set); }
+function goalOutcome() {
+  return goalIsSet() ? state.goal.outcome : DEFAULT_MISSION;
+}
+function goalMissionLine() {
+  if (!goalIsSet()) return DEFAULT_MISSION;
+  const g = state.goal;
+  const measure = g.metric
+    ? `${g.metric}: ${g.baseline || '?'} → ${g.target || '?'}${g.unit ? ' ' + g.unit : ''}`
+    : '';
+  return g.outcome + (measure ? ' — ' + measure : '');
+}
+function goalDaysLeft() {
+  if (!goalIsSet() || !state.goal.lockedUntil) return 0;
+  return Math.max(0, Math.ceil((state.goal.lockedUntil - Date.now()) / 864e5));
+}
+function goalEditable() {
+  if (!goalIsSet()) return true;
+  const g = state.goal;
+  if (Date.now() < (g.setAt || 0) + GRACE_HOURS * 3600 * 1000) return true;  // grace window
+  return Date.now() >= (g.lockedUntil || 0);                                  // lock expired
+}
+function goalProgressPct() {
+  const g = state.goal;
+  if (!goalIsSet()) return null;
+  const b = parseFloat(g.baseline), t = parseFloat(g.target), c = parseFloat(g.current);
+  if (isNaN(b) || isNaN(t) || isNaN(c) || b === t) return null;
+  return Math.max(0, Math.min(100, Math.round(((c - b) / (t - b)) * 100)));
+}
 
 const MOODS = [
   { id: 'drained',   face: '○',  label: 'Drained' },
@@ -1242,6 +1359,11 @@ const defaultState = {
   shutdown: { date: '', movedForward: '', mood: null, moodNote: '' },
   brainDump: '',
   people: [],       // delegate owners, remembered for quick pick
+  goal: {
+    set: false, outcome: '', metric: '', baseline: '', target: '', unit: '',
+    current: '', why: '', obstacle: '', firstMove: '',
+    setAt: 0, lockedUntil: 0, checkins: [],
+  },
   cloudSync: { enabled: false, projectId: '', apiKey: '', userId: '', lastSync: 0 },
 };
 
@@ -1529,6 +1651,8 @@ const icons = {
   info: '<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><circle cx="12" cy="12" r="10"/><path d="M12 16v-4"/><path d="M12 8h.01"/></svg>',
   trophy: '<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M6 9H4.5a2.5 2.5 0 0 1 0-5H6"/><path d="M18 9h1.5a2.5 2.5 0 0 0 0-5H18"/><path d="M4 22h16"/><path d="M10 14.66V17c0 .55-.47.98-.97 1.21C7.85 18.75 7 20.24 7 22"/><path d="M14 14.66V17c0 .55.47.98.97 1.21C16.15 18.75 17 20.24 17 22"/><path d="M18 2H6v7a6 6 0 0 0 12 0V2Z"/></svg>',
   brainSm: '<svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="vertical-align:-1px;"><path d="M12 5a3 3 0 1 0-5.997.125 4 4 0 0 0-2.526 5.77 4 4 0 0 0 .556 6.588A4 4 0 1 0 12 18Z"/><path d="M12 5a3 3 0 1 1 5.997.125 4 4 0 0 1 2.526 5.77 4 4 0 0 1-.556 6.588A4 4 0 1 1 12 18Z"/></svg>',
+  target: '<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><circle cx="12" cy="12" r="10"/><circle cx="12" cy="12" r="6"/><circle cx="12" cy="12" r="2"/></svg>',
+  lock: '<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7"><rect x="3" y="11" width="18" height="11" rx="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg>',
   zap: '<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"/></svg>',
   sync: '<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M3 12a9 9 0 0 1 15-6.7L21 8"/><path d="M21 3v5h-5"/><path d="M21 12a9 9 0 0 1-15 6.7L3 16"/><path d="M8 16H3v5"/></svg>',
 };
@@ -1568,6 +1692,10 @@ function renderTabbar() {
 function renderMain() {
   const m = document.getElementById('main');
   try {
+    // First run: force goal setup before anything else
+    if (!goalIsSet() && currentTab !== 'goal' && currentTab !== 'settings' && !state.goalSkipped) {
+      renderGoal(m); bindCompass(); return;
+    }
     if (currentTab === 'capture') renderCapture(m);
     else if (currentTab === 'today') renderToday(m);
     else if (currentTab === 'queue') renderQueue(m);
@@ -1580,6 +1708,8 @@ function renderMain() {
     else if (currentTab === 'history') renderHistory(m);
     else if (currentTab === 'rewards') renderRewards(m);
     else if (currentTab === 'settings') renderSettings(m);
+    else if (currentTab === 'goal') renderGoal(m);
+    bindCompass();
   } catch (e) {
     console.error('Tab render failed:', currentTab, e);
     m.innerHTML = `<div style="padding:20px;">
@@ -1593,13 +1723,37 @@ function renderMain() {
 }
 
 function compassHTML(nudge) {
+  if (!goalIsSet()) {
+    return `
+      <div class="compass compass-unset" id="compassSetGoal">
+        <div class="compass-label">No goal set</div>
+        <div class="compass-text">Everything in Ledger filters against one 3-month goal. Tap to set yours — it takes 5 minutes.</div>
+        <div class="compass-cta">Set my goal ${icons.arrowRight}</div>
+      </div>
+    `;
+  }
+  const pct = goalProgressPct();
+  const days = goalDaysLeft();
   return `
-    <div class="compass">
-      <div class="compass-label">Current Mission</div>
-      <div class="compass-text">${MISSION}</div>
+    <div class="compass" id="compassOpen">
+      <div class="compass-label">Current Goal · ${days} day${days === 1 ? '' : 's'} left</div>
+      <div class="compass-text">${escapeHtml(state.goal.outcome)}</div>
+      ${state.goal.metric ? `
+        <div class="compass-metric">
+          <span>${escapeHtml(state.goal.metric)}</span>
+          <span class="compass-metric-nums">${escapeHtml(state.goal.current || state.goal.baseline || '?')} / ${escapeHtml(state.goal.target || '?')}${state.goal.unit ? ' ' + escapeHtml(state.goal.unit) : ''}</span>
+        </div>
+        ${pct !== null ? `<div class="compass-bar"><div class="compass-bar-fill" style="width:${pct}%"></div></div>` : ''}
+      ` : ''}
       ${nudge ? `<div class="compass-nudge">${nudge}</div>` : ''}
     </div>
   `;
+}
+function bindCompass() {
+  const a = document.getElementById('compassSetGoal');
+  if (a) a.addEventListener('click', () => { currentTab = 'goal'; render(); });
+  const b = document.getElementById('compassOpen');
+  if (b) b.addEventListener('click', () => { currentTab = 'goal'; render(); });
 }
 
 // ============ HEADER MENU ============
@@ -1609,6 +1763,11 @@ function toggleHeaderMenu() {
   const schedN = scheduledItems().length;
   root.innerHTML = `
     <div class="header-menu">
+      <button class="header-menu-item" data-menu-tab="goal">
+        <span class="header-menu-icon">${icons.target}</span>
+        <span>${goalIsSet() ? 'The Goal · ' + goalDaysLeft() + 'd left' : 'Set your goal'}</span>
+      </button>
+      <div class="menu-divider"></div>
       <button class="header-menu-item" data-menu-tab="scheduled">
         <span class="header-menu-icon">${icons.calendar}</span>
         <span>Scheduled${schedN ? ` <span class="count-pill">${schedN}</span>` : ''}</span>
@@ -1638,6 +1797,7 @@ function toggleHeaderMenu() {
     b.addEventListener('click', e => {
       e.stopPropagation();
       currentTab = b.dataset.menuTab;
+      if (currentTab !== 'goal') { goalDraft = null; goalStage = 0; }
       root.innerHTML = '';
       render();
     });
@@ -1776,7 +1936,7 @@ const SIGNAL_QS = [
     q: 'How much evidence do I have that this is real rather than an assumption?',
     lo: 'Speculation', hi: 'Repeatedly observed' },
   { key: 'strategic', num: '04', label: 'Strategic Relevance',
-    q: 'How directly does solving this support Sales → Marketing → Demand → predictable production?',
+    q: null,   // filled at render time from the user's goal
     lo: 'Unrelated', hi: 'Directly relevant' },
   { key: 'leverage', num: '05', label: 'System Leverage',
     q: 'If I solve this properly, how much recurring work or dependency disappears?',
@@ -1968,7 +2128,7 @@ function renderProcess() {
             <span><span class="signal-q-num">${sq.num}</span><span class="signal-q-label">${sq.label}</span></span>
             <span class="signal-q-val" id="sv-${sq.key}">${proc.signal[sq.key]}</span>
           </div>
-          <div class="signal-q-text">${sq.q}</div>
+          <div class="signal-q-text">${sq.q || ('How directly does solving this move you toward: ' + escapeHtml(goalOutcome()) + '?')}</div>
           <div class="scale-btns" data-sigscale="${sq.key}">
             ${[1,2,3,4,5].map(n => `<button class="scale-pip ${n <= proc.signal[sq.key] ? 'active' : ''}" data-sigval="${sq.key}:${n}"></button>`).join('')}
           </div>
@@ -2236,6 +2396,335 @@ function commitProcess(it) {
     render();
     return;
   }
+}
+
+// ============ GOAL ============
+let goalDraft = null;
+let goalStage = 0;
+
+const GOAL_STEPS = [
+  {
+    key: 'outcome',
+    num: '01',
+    title: 'What must be different in 3 months?',
+    hint: 'One sentence, written as an outcome — not an activity. Not "work on sales" but "sales run without me chasing every order."',
+    placeholder: 'In 3 months, ___ will be true.',
+    rows: 3,
+    validate: v => v.trim().length >= 10 || 'Write at least a full sentence.',
+  },
+  {
+    key: 'metric',
+    num: '02',
+    title: 'How will you know — by number?',
+    hint: 'If you cannot count it, you cannot tell whether you got there. Name the single number that proves it.',
+    placeholder: 'e.g. monthly repeat orders, days to dispatch, % dead stock',
+    rows: 2,
+    validate: v => v.trim().length >= 3 || 'Name a measurable number.',
+  },
+  {
+    key: 'numbers',
+    num: '03',
+    title: 'Where is it now, and where must it be?',
+    hint: 'Honest baseline. A target you have maybe a 70% chance of hitting — hard enough to matter, real enough to reach.',
+    special: 'numbers',
+  },
+  {
+    key: 'why',
+    num: '04',
+    title: 'Why this, and not something else?',
+    hint: 'What does hitting this unlock? If you cannot answer, the goal is probably not the real one.',
+    placeholder: 'What changes for you if this lands…',
+    rows: 3,
+    validate: v => v.trim().length >= 10 || 'Say a bit more.',
+  },
+  {
+    key: 'obstacle',
+    num: '05',
+    title: 'What is most likely to stop you?',
+    hint: 'Name it now, while you are calm. In week 6 you will not be.',
+    placeholder: 'The realistic thing that derails this…',
+    rows: 3,
+    validate: v => v.trim().length >= 5 || 'Name at least one.',
+  },
+  {
+    key: 'firstMove',
+    num: '06',
+    title: 'What is the first concrete move?',
+    hint: 'Something you could do this week. It goes straight into your inbox when you confirm.',
+    placeholder: 'One executable action…',
+    rows: 2,
+    validate: v => v.trim().length >= 5 || 'Make it concrete.',
+  },
+];
+
+function renderGoal(root) {
+  // Existing goal, not in wizard → dashboard
+  if (goalIsSet() && goalDraft === null) { renderGoalDashboard(root); return; }
+  if (goalDraft === null) {
+    goalDraft = { outcome: '', metric: '', baseline: '', target: '', unit: '', why: '', obstacle: '', firstMove: '' };
+    goalStage = 0;
+  }
+  renderGoalWizard(root);
+}
+
+function renderGoalWizard(root) {
+  const step = GOAL_STEPS[goalStage];
+  const isReview = goalStage >= GOAL_STEPS.length;
+
+  if (isReview) {
+    root.innerHTML = `
+      <div class="section-head">
+        <div class="eyebrow">Confirm</div>
+        <h1>Lock this in?</h1>
+        <p class="sub">Once confirmed, this goal cannot be changed for ${LOCK_DAYS} days. That is the point — it stops you rewriting the target every time a week goes badly.</p>
+      </div>
+      <div class="goal-review">
+        <div class="goal-review-row"><span class="goal-review-label">Outcome</span><div>${escapeHtml(goalDraft.outcome)}</div></div>
+        <div class="goal-review-row"><span class="goal-review-label">Measured by</span><div>${escapeHtml(goalDraft.metric)}</div></div>
+        <div class="goal-review-row"><span class="goal-review-label">From → To</span><div>${escapeHtml(goalDraft.baseline)} → ${escapeHtml(goalDraft.target)}${goalDraft.unit ? ' ' + escapeHtml(goalDraft.unit) : ''}</div></div>
+        <div class="goal-review-row"><span class="goal-review-label">Why</span><div>${escapeHtml(goalDraft.why)}</div></div>
+        <div class="goal-review-row"><span class="goal-review-label">Risk</span><div>${escapeHtml(goalDraft.obstacle)}</div></div>
+        <div class="goal-review-row"><span class="goal-review-label">First move</span><div>${escapeHtml(goalDraft.firstMove)}</div></div>
+      </div>
+      <div class="principle-note" style="margin-top:16px;">
+        <strong>You get a ${GRACE_HOURS}-hour grace window</strong> to fix typos. After that it is locked until the ${LOCK_DAYS} days are up.
+      </div>
+      <div style="display:flex;gap:8px;margin-top:8px;">
+        <button class="btn-secondary-full" id="goalBack">Back</button>
+        <button class="btn-primary-full" id="goalConfirm">${icons.check}<span>Lock for ${LOCK_DAYS} days</span></button>
+      </div>
+    `;
+    document.getElementById('goalBack').addEventListener('click', () => { goalStage--; render(); });
+    document.getElementById('goalConfirm').addEventListener('click', commitGoal);
+    return;
+  }
+
+  const pct = Math.round((goalStage / GOAL_STEPS.length) * 100);
+  root.innerHTML = `
+    <div class="section-head">
+      <div class="eyebrow">Set your goal · ${goalStage + 1} of ${GOAL_STEPS.length}</div>
+      <h1>${step.title}</h1>
+      <p class="sub">${step.hint}</p>
+    </div>
+    <div class="goal-progress"><div class="goal-progress-fill" style="width:${pct}%"></div></div>
+
+    ${step.special === 'numbers' ? `
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px;">
+        <div>
+          <label class="label">Now (baseline)</label>
+          <input class="field-input" id="g-baseline" value="${escapeHtml(goalDraft.baseline)}" placeholder="e.g. 12" inputmode="decimal" />
+        </div>
+        <div>
+          <label class="label">Target</label>
+          <input class="field-input" id="g-target" value="${escapeHtml(goalDraft.target)}" placeholder="e.g. 30" inputmode="decimal" />
+        </div>
+      </div>
+      <label class="label">Unit <span style="opacity:0.6;">(optional)</span></label>
+      <input class="field-input" id="g-unit" value="${escapeHtml(goalDraft.unit)}" placeholder="orders / days / % / ₹ lakh" />
+      <div class="principle-note">Use plain numbers so progress can be tracked. "30" not "about thirty".</div>
+    ` : `
+      <textarea class="field-textarea" id="g-field" rows="${step.rows}" placeholder="${escapeHtml(step.placeholder)}">${escapeHtml(goalDraft[step.key] || '')}</textarea>
+    `}
+
+    <div style="display:flex;gap:8px;margin-top:8px;">
+      ${goalStage > 0 ? '<button class="btn-secondary-full" id="goalBack">Back</button>' : ''}
+      <button class="btn-primary-full" id="goalNext">Continue ${icons.arrowRight}</button>
+    </div>
+    ${goalStage === 0 && !goalIsSet() ? '<button class="mini-btn" id="goalSkip" style="width:100%;justify-content:center;margin-top:14px;">Skip for now</button>' : ''}
+  `;
+
+  const backBtn = document.getElementById('goalBack');
+  if (backBtn) backBtn.addEventListener('click', () => { captureGoalStage(); goalStage--; render(); });
+
+  document.getElementById('goalNext').addEventListener('click', () => {
+    const err = captureGoalStage(true);
+    if (err) { showToast(err); return; }
+    goalStage++;
+    render();
+  });
+
+  const skip = document.getElementById('goalSkip');
+  if (skip) skip.addEventListener('click', () => {
+    state.goalSkipped = true; saveState();
+    goalDraft = null; currentTab = 'capture'; render();
+  });
+}
+
+function captureGoalStage(validate) {
+  const step = GOAL_STEPS[goalStage];
+  if (!step) return null;
+  if (step.special === 'numbers') {
+    goalDraft.baseline = (document.getElementById('g-baseline') || {}).value || '';
+    goalDraft.target = (document.getElementById('g-target') || {}).value || '';
+    goalDraft.unit = (document.getElementById('g-unit') || {}).value || '';
+    if (validate) {
+      if (!goalDraft.baseline.trim() || !goalDraft.target.trim()) return 'Fill both numbers.';
+      if (goalDraft.baseline.trim() === goalDraft.target.trim()) return 'Target must differ from baseline.';
+    }
+    return null;
+  }
+  const el = document.getElementById('g-field');
+  if (el) goalDraft[step.key] = el.value;
+  if (validate && step.validate) {
+    const r = step.validate(goalDraft[step.key] || '');
+    if (r !== true) return r;
+  }
+  return null;
+}
+
+function commitGoal() {
+  const now = Date.now();
+  state.goal = {
+    set: true,
+    outcome: goalDraft.outcome.trim(),
+    metric: goalDraft.metric.trim(),
+    baseline: goalDraft.baseline.trim(),
+    target: goalDraft.target.trim(),
+    unit: goalDraft.unit.trim(),
+    current: goalDraft.baseline.trim(),
+    why: goalDraft.why.trim(),
+    obstacle: goalDraft.obstacle.trim(),
+    firstMove: goalDraft.firstMove.trim(),
+    setAt: now,
+    lockedUntil: now + LOCK_DAYS * 864e5,
+    checkins: [{ ts: now, value: goalDraft.baseline.trim(), note: 'Baseline' }],
+  };
+  state.goalSkipped = false;
+  // First move goes straight into the inbox
+  if (goalDraft.firstMove.trim()) {
+    state.items.unshift({
+      id: uid('i'), text: goalDraft.firstMove.trim(), ts: now, status: 'inbox',
+      needsMe: null, nowMeta: null, todayMeta: null, delegateMeta: null,
+      scheduleMeta: null, classification: null, signal: null, itemType: null,
+      steps: [], domainId: null, doneAt: null, prevStatus: null, nextAction: '',
+      fromDeep: null, deepContext: null,
+    });
+  }
+  goalDraft = null; goalStage = 0;
+  saveState();
+  showToast('Goal locked for ' + LOCK_DAYS + ' days');
+  currentTab = 'capture';
+  render();
+}
+
+function renderGoalDashboard(root) {
+  const g = state.goal;
+  const pct = goalProgressPct();
+  const days = goalDaysLeft();
+  const editable = goalEditable();
+  const inGrace = Date.now() < (g.setAt || 0) + GRACE_HOURS * 3600 * 1000;
+  const elapsed = Math.max(0, Math.floor((Date.now() - g.setAt) / 864e5));
+
+  root.innerHTML = `
+    <div class="section-head">
+      <div class="eyebrow">The Goal</div>
+      <h1>${escapeHtml(g.outcome)}</h1>
+    </div>
+
+    <div class="goal-card">
+      <div class="goal-metric-head">
+        <span class="goal-metric-name">${escapeHtml(g.metric)}</span>
+        <span class="goal-metric-val">${escapeHtml(g.current || g.baseline)}<span class="goal-metric-target"> / ${escapeHtml(g.target)}${g.unit ? ' ' + escapeHtml(g.unit) : ''}</span></span>
+      </div>
+      ${pct !== null ? `
+        <div class="goal-bar"><div class="goal-bar-fill" style="width:${pct}%"></div></div>
+        <div class="goal-bar-labels"><span>${escapeHtml(g.baseline)} start</span><span>${pct}%</span><span>${escapeHtml(g.target)} target</span></div>
+      ` : '<div class="close-auto-empty">Non-numeric baseline/target — progress bar unavailable.</div>'}
+      <div class="goal-timeline">
+        <span>Day ${elapsed} of ${LOCK_DAYS}</span>
+        <span>${days} day${days === 1 ? '' : 's'} remaining</span>
+      </div>
+    </div>
+
+    <div class="section-actions">
+      <button class="mini-btn active" id="checkinBtn" style="flex:1;justify-content:center;">${icons.plus} Log progress</button>
+    </div>
+
+    <div class="goal-detail">
+      <div class="goal-detail-row"><span class="goal-review-label">Why</span><div>${nl2br(g.why)}</div></div>
+      <div class="goal-detail-row"><span class="goal-review-label">Named risk</span><div>${nl2br(g.obstacle)}</div></div>
+    </div>
+
+    ${g.checkins && g.checkins.length > 1 ? `
+      <div class="divider"><span class="divider-text">Check-ins</span></div>
+      <div class="list">
+        ${g.checkins.slice().reverse().slice(0, 12).map(c => `
+          <div class="history-card">
+            <div class="history-date">${formatDate(new Date(c.ts))}</div>
+            <div style="font-size:15px;"><strong style="color:var(--accent);font-style:italic;">${escapeHtml(c.value)}</strong>${g.unit ? ' ' + escapeHtml(g.unit) : ''}</div>
+            ${c.note ? `<div style="font-size:12px;color:var(--ink-soft);margin-top:4px;line-height:1.45;">${escapeHtml(c.note)}</div>` : ''}
+          </div>
+        `).join('')}
+      </div>
+    ` : ''}
+
+    <div class="divider"><span class="divider-text">Changing the goal</span></div>
+    ${editable ? `
+      <div class="principle-note">
+        ${inGrace
+          ? `You are inside the ${GRACE_HOURS}-hour grace window — fix anything wrong now.`
+          : 'The lock period has ended. You can set a new goal.'}
+      </div>
+      <button class="btn-secondary-full" id="editGoalBtn">${inGrace ? 'Edit goal' : 'Set a new goal'}</button>
+    ` : `
+      <div class="goal-locked">
+        ${icons.lock}
+        <div>
+          <div class="goal-locked-title">Locked for ${days} more day${days === 1 ? '' : 's'}</div>
+          <div class="goal-locked-sub">You committed to this on ${formatDate(new Date(g.setAt))}. Rewriting the target when a week goes badly is how goals quietly disappear — so this stays fixed. Log progress instead.</div>
+        </div>
+      </div>
+    `}
+  `;
+
+  document.getElementById('checkinBtn').addEventListener('click', openCheckin);
+  const eb = document.getElementById('editGoalBtn');
+  if (eb) eb.addEventListener('click', () => {
+    confirmDialog({
+      title: inGrace ? 'Edit the goal?' : 'Set a new goal?',
+      message: inGrace ? 'You can still adjust it inside the grace window.' : 'This replaces your current goal and starts a fresh ' + LOCK_DAYS + '-day lock.',
+      okText: inGrace ? 'Edit' : 'Start new', danger: false,
+      onConfirm: () => {
+        goalDraft = {
+          outcome: g.outcome, metric: g.metric, baseline: g.baseline, target: g.target,
+          unit: g.unit, why: g.why, obstacle: g.obstacle, firstMove: '',
+        };
+        goalStage = 0; render();
+      },
+    });
+  });
+}
+
+function openCheckin() {
+  const g = state.goal;
+  document.getElementById('modal-root').innerHTML = `
+    <div class="modal-overlay" id="modalOverlay">
+      <div class="modal" id="modalBody">
+        <div class="modal-head">
+          <div class="modal-eyebrow">Log Progress</div>
+          <button class="icon-btn" id="closeModal">${icons.xBig}</button>
+        </div>
+        <div class="modal-problem">"${escapeHtml(g.metric)}"</div>
+        <label class="label">Where is it now?<span class="label-sub">Target is ${escapeHtml(g.target)}${g.unit ? ' ' + escapeHtml(g.unit) : ''}. Last logged: ${escapeHtml(g.current || g.baseline)}.</span></label>
+        <input class="field-input" id="ci-value" value="${escapeHtml(g.current || g.baseline)}" inputmode="decimal" />
+        <label class="label">Note <span style="opacity:0.6;">(optional)</span></label>
+        <textarea class="field-textarea" id="ci-note" rows="2" placeholder="What moved it, or what didn't…"></textarea>
+        <button class="btn-primary-full" id="ci-save">${icons.check}<span>Log it</span></button>
+      </div>
+    </div>
+  `;
+  document.getElementById('modalOverlay').addEventListener('click', closeModal);
+  document.getElementById('modalBody').addEventListener('click', e => e.stopPropagation());
+  document.getElementById('closeModal').addEventListener('click', closeModal);
+  document.getElementById('ci-save').addEventListener('click', () => {
+    const v = (document.getElementById('ci-value').value || '').trim();
+    if (!v) { showToast('Enter a value'); return; }
+    const note = (document.getElementById('ci-note').value || '').trim();
+    state.goal.current = v;
+    state.goal.checkins = state.goal.checkins || [];
+    state.goal.checkins.push({ ts: Date.now(), value: v, note });
+    saveState(); closeModal(); showToast('Progress logged'); render();
+  });
 }
 
 // ============ 12. TODAY ============
@@ -2554,18 +3043,24 @@ function moveToToday(itemId) {
 let deepDraft = null;
 let dwTimerStart = null, dwTimerInterval = null, dwReframeShown = false;
 
-const DEEP_STAGES = [
-  { key: 'problem', num: '01', label: 'Define Problem',
-    sub: 'What exactly is happening that shouldn\'t be happening? Bad: "production is messy." Good: "I cannot determine an item\'s production stage without calling multiple people."', rows: 3 },
-  { key: 'impact', num: '02', label: 'Impact',
-    sub: 'What does this cost? Money, time, errors, delays, customer experience, lost opportunity, your attention.', rows: 3 },
-  { key: 'cause', num: '03', label: 'Cause',
-    sub: 'Why does this happen? Root cause, not symptom.', rows: 3 },
-  { key: 'system', num: '04', label: 'System',
-    sub: 'What would have to change so this problem stops reaching me? The goal is reducing future dependence on you — not just fixing today.', rows: 4 },
-  { key: 'nextTest', num: '05', label: 'Next Test',
-    sub: 'What is the smallest action that can test or fix this? Required to close.', rows: 2 },
-];
+function deepStages() {
+  const g = goalIsSet() ? state.goal.outcome : 'your goal';
+  const metric = goalIsSet() && state.goal.metric ? state.goal.metric : null;
+  return [
+    { key: 'problem', num: '01', label: 'Define Problem',
+      sub: 'What exactly is happening that shouldn\'t be happening? Bad: "production is messy." Good: "I cannot determine an item\'s production stage without calling multiple people."', rows: 3 },
+    { key: 'goalLink', num: '02', label: 'Link to the Goal',
+      sub: `How is this holding back — <em>${escapeHtml(g)}</em>?${metric ? ` Be specific about its effect on <em>${escapeHtml(metric)}</em>.` : ''} If you can't connect it, this may not be worth a deep session.`, rows: 3 },
+    { key: 'impact', num: '03', label: 'Impact',
+      sub: 'What does this cost? Money, time, errors, delays, customer experience, lost opportunity, your attention.', rows: 3 },
+    { key: 'cause', num: '04', label: 'Cause',
+      sub: 'Why does this happen? Root cause, not symptom.', rows: 3 },
+    { key: 'system', num: '05', label: 'System',
+      sub: `What would have to change so this stops reaching you <em>and</em> moves you toward the goal? The objective is removing the dependency — not just fixing today.`, rows: 4 },
+    { key: 'nextTest', num: '06', label: 'Next Test',
+      sub: 'What is the smallest action that can test or fix this? Required to close.', rows: 2 },
+  ];
+}
 
 function renderDeep(root) {
   if (deepDraft) { renderDeepSession(root); return; }
@@ -2622,7 +3117,7 @@ function startDeep(itemId) {
   if (!it) return;
   deepDraft = {
     itemId, sourceText: it.text,
-    problem: it.text, impact: '', cause: '', system: '', nextTest: '',
+    problem: it.text, goalLink: '', impact: '', cause: '', system: '', nextTest: '',
   };
   currentTab = 'deep';
   render();
@@ -2645,7 +3140,7 @@ function renderDeepSession(root) {
     <div id="dwReframeBanner"></div>
     <div class="dw-warn">${icons.info} <strong>Rule:</strong> no new insight in 15–20 min → stop. Collect data or test an assumption instead.</div>
 
-    ${DEEP_STAGES.map(st => `
+    ${deepStages().map(st => `
       <div class="dw-stage">
         <div class="dw-stage-head">
           <span class="dw-stage-num">${st.num}</span>
@@ -2690,6 +3185,7 @@ function renderDeepSession(root) {
       id: sessionId, itemId: deepDraft.itemId, sourceText: deepDraft.sourceText,
       problem: deepDraft.problem.trim(), impact: deepDraft.impact.trim(),
       cause: deepDraft.cause.trim(), system: deepDraft.system.trim(),
+      goalLink: (deepDraft.goalLink || '').trim(),
       nextTest, ts: Date.now(),
       domainId: it ? it.domainId : null,
     });
@@ -3881,6 +4377,7 @@ function normalizeState(s) {
       impact: String(d.impact || d.objective || ''),
       cause: String(d.cause || d.variables || ''),
       system: String(d.system || d.output || ''),
+      goalLink: String(d.goalLink || ''),
       nextTest: String(d.nextTest || d.nextAction || ''),
       ts: Number(d.ts)||Date.now(), domainId: d.domainId || null,
     }));
@@ -3919,6 +4416,27 @@ function normalizeState(s) {
   }
   if (typeof s.brainDump === 'string') out.brainDump = s.brainDump;
   if (Array.isArray(s.people)) out.people = s.people.filter(p => typeof p === 'string');
+  out.goalSkipped = !!s.goalSkipped;
+  if (s.goal && typeof s.goal === 'object' && s.goal.set) {
+    out.goal = {
+      set: true,
+      outcome: String(s.goal.outcome || ''),
+      metric: String(s.goal.metric || ''),
+      baseline: String(s.goal.baseline || ''),
+      target: String(s.goal.target || ''),
+      unit: String(s.goal.unit || ''),
+      current: String(s.goal.current || s.goal.baseline || ''),
+      why: String(s.goal.why || ''),
+      obstacle: String(s.goal.obstacle || ''),
+      firstMove: String(s.goal.firstMove || ''),
+      setAt: Number(s.goal.setAt) || Date.now(),
+      lockedUntil: Number(s.goal.lockedUntil) || (Number(s.goal.setAt) || Date.now()) + LOCK_DAYS * 864e5,
+      checkins: Array.isArray(s.goal.checkins)
+        ? s.goal.checkins.filter(c => c && typeof c === 'object')
+            .map(c => ({ ts: Number(c.ts) || Date.now(), value: String(c.value || ''), note: String(c.note || '') }))
+        : [],
+    };
+  }
   if (s.cloudSync && typeof s.cloudSync === 'object') {
     out.cloudSync = {
       enabled: !!s.cloudSync.enabled,
